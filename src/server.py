@@ -228,7 +228,10 @@ def new_text_job(filename, entries, kind="production"):
 
 
 def ingest_token():
-    for line in open(os.path.join(ROOT, ".env")):
+    if os.environ.get("INGEST_TOKEN"):
+        return os.environ["INGEST_TOKEN"]
+    fp = os.path.join(ROOT, ".env")
+    for line in (open(fp) if os.path.exists(fp) else []):
         if line.startswith("INGEST_TOKEN="):
             return line.split("=", 1)[1].strip()
     return ""
@@ -369,7 +372,28 @@ class H(BaseHTTPRequestHandler):
             raise ValueError("file too large (limit 60 MB)")
         return self.rfile.read(n)
 
+    def _authed(self, open_paths=()):
+        """Shared-password gate (HTTP Basic) when SITE_PASSWORD is set; any username. Paths in open_paths use their own token."""
+        pw = os.environ.get("SITE_PASSWORD")
+        if not pw or urlparse(self.path).path in open_paths:
+            return True
+        import base64
+        import hmac
+        try:
+            given = base64.b64decode(self.headers.get("Authorization", "")[6:]).decode().partition(":")[2]
+        except Exception:
+            given = ""
+        if hmac.compare_digest(given.encode(), pw.encode()):
+            return True
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="Vani audit"')
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+        return False
+
     def do_GET(self):
+        if not self._authed():
+            return
         u = urlparse(self.path)
         parts = [p for p in u.path.split("/") if p]
         if not parts:
@@ -468,6 +492,8 @@ class H(BaseHTTPRequestHandler):
         self.send(404, {"error": "not found"})
 
     def do_POST(self):
+        if not self._authed(("/api/ingest",)):
+            return
         u = urlparse(self.path)
         parts = [p for p in u.path.split("/") if p]
         try:
@@ -607,5 +633,6 @@ if __name__ == "__main__":
     threading.Thread(target=assign_pending, daemon=True).start()
     threading.Thread(target=inbox_loop, daemon=True).start()
     port = int(os.environ.get("PORT", 8791))
-    print(f"Vani audit site: http://127.0.0.1:{port}")
-    ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()
+    host = os.environ.get("HOST", "127.0.0.1")  # 0.0.0.0 inside a container
+    print(f"Vani audit site: http://{host}:{port}")
+    ThreadingHTTPServer((host, port), H).serve_forever()
