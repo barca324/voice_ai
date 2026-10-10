@@ -11,6 +11,8 @@ MODEL = "sarvam-105b"
 
 
 def key():
+    if os.environ.get("SARVAM_API_KEY"):
+        return os.environ["SARVAM_API_KEY"]
     for line in open(os.path.join(ROOT, ".env")):
         if line.startswith("SARVAM_API_KEY="):
             return line.split("=", 1)[1].strip()
