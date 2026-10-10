@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vani Call Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  /* identity: a quality-control desk for phone calls. Cool teal-tinted neutrals, one deep teal accent, status colours kept for verdicts only. */
+  --display:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;--body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --bg:#EEF2F2;--panel:#FFFFFF;--ink:#0F1C1F;--ink2:#34464A;--muted:#5F7175;--line:#D9E1E2;--line2:#ECF0F1;
+  --brand:#0B6E6B;--brand-ink:#FFFFFF;--brand-soft:#DCEFEE;
+  --pass:#1B7F4B;--pass-bg:#E0F2E7;--nf:#9A5B00;--nf-bg:#FBEACB;--fatal:#BA2D2D;--fatal-bg:#FBE2DF;--na:#5F7175;--na-bg:#E7EDEE;
+  --bot:#E6F1F1;--buyer:#EEF2E8;--shadow:0 1px 0 rgba(15,28,31,.04),0 6px 18px rgba(15,28,31,.05);
+  --c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#e87ba4;--c6:#008300;--grid:#E3E9EA;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1416;--panel:#111D20;--ink:#E6EEEF;--ink2:#BDCBCD;--muted:#8CA0A3;--line:#233438;--line2:#1A2A2E;
+  --brand:#41B8B1;--brand-ink:#08201F;--brand-soft:#12353A;
+  --pass:#5BD39B;--pass-bg:#10322A;--nf:#F2B65A;--nf-bg:#3A2D12;--fatal:#FF8B86;--fatal-bg:#3D1D1D;--na:#8CA0A3;--na-bg:#1C2B2F;
+  --bot:#14292D;--buyer:#1A2C22;--shadow:0 1px 0 rgba(0,0,0,.3);
+  --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--grid:#1C2B2F;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1416;--panel:#111D20;--ink:#E6EEEF;--ink2:#BDCBCD;--muted:#8CA0A3;--line:#233438;--line2:#1A2A2E;
+  --brand:#41B8B1;--brand-ink:#08201F;--brand-soft:#12353A;
+  --pass:#5BD39B;--pass-bg:#10322A;--nf:#F2B65A;--nf-bg:#3A2D12;--fatal:#FF8B86;--fatal-bg:#3D1D1D;--na:#8CA0A3;--na-bg:#1C2B2F;
+  --bot:#14292D;--buyer:#1A2C22;--shadow:0 1px 0 rgba(0,0,0,.3);
+  --c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#d55181;--c6:#008300;--grid:#1C2B2F;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:318px minmax(0,1fr);min-height:100vh}
+@media(max-width:900px){.shell{grid-template-columns:1fr}}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:20px 16px;display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh;overflow:auto}
+@media(max-width:900px){.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}}
+.brand{display:flex;align-items:center;gap:10px;font:700 16px/1.2 var(--display);letter-spacing:-.01em}
+.logo{width:30px;height:30px;border-radius:7px;background:var(--brand);display:grid;place-items:center;color:var(--brand-ink)}
+.sub{color:var(--muted);font-size:12px;font-weight:400;display:block;margin-top:-2px}
+.label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin:0 0 8px}
+.drop{border:1.5px dashed #c3c9d8;border-radius:12px;padding:20px 12px;text-align:center;color:var(--muted);cursor:pointer;background:var(--bg);transition:.15s}
+.drop:hover,.drop.over{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.drop b{display:block;color:var(--ink);font-weight:600;margin-top:6px}
+.drop svg{width:26px;height:26px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sbtn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:4px 9px;font-size:12px;color:var(--ink2)}
+.sbtn:hover{border-color:var(--brand);color:var(--brand)}
+.jobs{display:flex;flex-direction:column;gap:6px}
+.job{border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;background:var(--panel);display:grid;gap:3px}
+.job:hover{border-color:#b9c2da}.job.sel{border-color:var(--brand);background:var(--brand-soft)}
+.job{min-width:0;overflow:hidden}.job .row{min-width:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.job .fn{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job .when{font-size:11px;color:var(--muted)}
+.paste{margin-top:12px;font-size:13px}.paste summary{cursor:pointer;color:var(--brand);font-weight:600}
+.field{display:block;width:100%;margin:8px 0;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px;resize:vertical}
+.nav{display:grid;gap:2px}.navbtn{display:flex;align-items:center;gap:10px;border:0;background:none;border-radius:7px;padding:8px 10px;font:600 13.5px var(--body);color:var(--ink2);text-align:left}
+.navbtn:hover{background:var(--bg)}.navbtn.on{background:var(--brand-soft);color:var(--brand)}
+.navbtn:focus-visible,.btn:focus-visible,summary:focus-visible,.job:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.mx{border-collapse:collapse;font-size:13px}.mx th,.mx td{padding:6px 12px;border:1px solid var(--line);text-align:center}.mx th{color:var(--muted);font-weight:600;font-size:12px}
+.mx td.hit{background:var(--pass-bg);color:var(--pass);font-weight:700}.mx td.bad{background:var(--fatal-bg);color:var(--fatal);font-weight:700}.mx td.z{color:var(--muted)}
+.bcall{border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--panel)}
+.bcall summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:120px 1fr 1fr 120px 90px;gap:10px;align-items:center;padding:9px 12px}
+.bcall summary::-webkit-details-marker{display:none}
+@media(max-width:760px){.bcall summary{grid-template-columns:1fr 1fr}}
+.dline{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line2);font-size:13px}
+
+/* ---------- overview ---------- */
+.ov{display:grid;gap:30px;max-width:none}
+.ov h1{font:700 clamp(28px,4.2vw,40px)/1.08 var(--display);letter-spacing:-.025em;margin:0;text-wrap:balance;max-width:20ch}
+.ov h2{font:700 20px/1.2 var(--display);letter-spacing:-.015em;margin:0}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--brand);margin:0 0 10px}
+.lede{font-size:17px;line-height:1.55;color:var(--ink2);max-width:62ch;margin:14px 0 0}
+.lede b{color:var(--ink)}
+.provenance{font:400 12px var(--mono);color:var(--muted);margin-top:12px}
+.sect-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.sect-head p{margin:0;color:var(--muted);font-size:13px;max-width:60ch}
+.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.flow li{padding:14px 16px;display:grid;gap:3px;border-right:1px solid var(--line);min-width:0}
+.flow li:last-child{border-right:0}
+.flow .st{display:flex;align-items:center;gap:8px;font:600 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.flow .dot{width:10px;height:10px;border-radius:50%;border:2px solid currentColor;flex:none}
+.flow .done .dot{background:var(--pass);border-color:var(--pass)}.flow .done .st{color:var(--pass)}
+.flow .todo .st{color:var(--nf)}
+.flow b{font:700 15px var(--display)}.flow span.d{font-size:13px;color:var(--ink2)}
+@media(max-width:760px){.flow{grid-template-columns:1fr 1fr}.flow li:nth-child(2){border-right:0}.flow li:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+.guide{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.guide>summary{cursor:pointer;list-style:none;padding:14px 18px;font:700 15px var(--display);display:flex;justify-content:space-between;align-items:center}
+.guide>summary::-webkit-details-marker{display:none}
+.guide>summary::after{content:"Hide";font:500 12px var(--mono);color:var(--muted)}
+.guide:not([open])>summary::after{content:"Show"}
+.guide .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:2px 18px 18px}
+.guide .cols3 b{display:block;font:700 13px var(--display);margin-bottom:4px}
+.guide .cols3 p{margin:0;font-size:13.5px;color:var(--ink2)}
+@media(max-width:760px){.guide .cols3{grid-template-columns:1fr}}
+.pats{display:grid;gap:10px}
+.pat{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.pat>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr) 210px;gap:14px;align-items:center;padding:16px 18px}
+.pat>summary::-webkit-details-marker{display:none}
+.pat[open]>summary{border-bottom:1px solid var(--line2)}
+.rank{font:700 30px/1 var(--display);color:var(--muted);font-variant-numeric:tabular-nums}
+.ptitle{display:flex;align-items:center;gap:10px;font:700 17px/1.25 var(--display);letter-spacing:-.01em}
+.sw{width:12px;height:12px;border-radius:3px;flex:none}
+.psum{margin:4px 0 0;font-size:13.5px;color:var(--ink2);max-width:64ch}
+.pstat{display:grid;gap:6px;font-size:12.5px;color:var(--ink2)}
+.pstat .bar2{height:8px;border-radius:4px;background:var(--line2);overflow:hidden}
+.pstat .bar2 i{display:block;height:100%;border-radius:4px}
+.pstat .nums{display:flex;gap:12px;font-variant-numeric:tabular-nums}.pstat .nums b{color:var(--ink);font:600 13px var(--body)}
+@media(max-width:820px){.pat>summary{grid-template-columns:34px minmax(0,1fr)}.pstat{grid-column:2}}
+.pbody2{padding:16px 18px 18px;display:grid;gap:18px}
+.pbody2 h4{margin:0 0 8px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ex{display:grid;gap:10px}
+.ex .e{display:grid;grid-template-columns:132px minmax(0,1fr);gap:4px 14px;font-size:13.5px;padding:10px 0;border-top:1px solid var(--line2)}
+.ex .e:first-child{border-top:0;padding-top:0}
+.ex .meta{font:500 11.5px var(--mono);color:var(--muted);line-height:1.5}
+.ex q{display:block;font:400 13px var(--mono);color:var(--ink);background:var(--bg);border-radius:5px;padding:3px 8px;margin-top:5px;quotes:none;width:fit-content;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:620px){.ex .e{grid-template-columns:1fr}}
+.fixbox{border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:12px;background:var(--bg)}
+.tag{display:inline-block;font:600 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--brand-soft);color:var(--brand)}
+.tag.warn{background:var(--nf-bg);color:var(--nf)}.tag.mute{background:var(--na-bg);color:var(--na)}
+.change{font:400 13px/1.6 var(--mono);white-space:pre-wrap;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.kv2{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 14px;font-size:13.5px}
+.kv2 dt{color:var(--muted)}.kv2 dd{margin:0}
+@media(max-width:620px){.kv2{grid-template-columns:1fr}}
+.callout{border-left:3px solid var(--nf);background:var(--nf-bg);color:var(--ink);padding:9px 12px;border-radius:0 6px 6px 0;font-size:13.5px}
+.callout.ok{border-color:var(--brand);background:var(--brand-soft)}
+.fixfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chart{display:grid;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.legend{display:flex;gap:18px;font-size:12.5px;color:var(--ink2);align-items:center;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.crow{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) 34px;gap:12px;align-items:center;padding:3px 0;font-size:13px;border-radius:4px}
+.crow:hover{background:var(--bg)}
+.crow .trk{display:flex;gap:2px;height:12px}
+.crow .trk i{display:block;height:100%;border-radius:0 4px 4px 0}
+.crow .trk i:first-child{border-radius:2px 4px 4px 2px}
+.crow .tot{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line2);text-align:left}.tbl th{color:var(--muted);font:600 11px var(--mono);text-transform:uppercase}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:6px 10px;border-radius:6px;opacity:0;transition:opacity .08s;max-width:260px}
+.trust{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.trust{grid-template-columns:1fr}}
+.tbox{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:18px;display:grid;gap:10px;align-content:start}
+.tbox h3{margin:0;font:700 15px var(--display)}
+.big2{font:700 34px/1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.big2 small{font:500 13px var(--body);color:var(--muted);letter-spacing:0;margin-left:6px}
+.rowlist{display:grid;gap:6px;font-size:13.5px}.rowlist div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line2);padding-bottom:5px}
+.rowlist b{font-variant-numeric:tabular-nums}
+.gloss{display:grid;grid-template-columns:repeat(2,1fr);gap:0 36px}
+.gloss dl{margin:0;display:grid;gap:12px}
+.gloss dt{font:700 14px var(--display)}.gloss dd{margin:2px 0 0;font-size:13.5px;color:var(--ink2)}
+@media(max-width:760px){.gloss{grid-template-columns:1fr}}
+.linkbtn{color:var(--brand);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:0;padding:0;font:inherit}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+.livebar{display:grid;gap:12px}
+.liverow{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.liverow>div{padding:14px 16px;border-right:1px solid var(--line);min-width:0}
+.liverow b{display:block;font:700 26px/1.1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.liverow span{font-size:12.5px;color:var(--muted)}
+.liverow .act{display:grid;align-content:center;gap:6px;border-right:0;min-width:190px}
+@media(max-width:860px){.liverow{grid-template-columns:1fr 1fr}.liverow>div{border-bottom:1px solid var(--line)}.liverow .act{grid-column:1/-1}}
+.rcalls{display:grid;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.rcall{display:grid;grid-template-columns:minmax(120px,220px) auto minmax(0,1fr);gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--line2);text-decoration:none;color:inherit;font-size:13.5px}
+.rcall:first-child{border-top:0}.rcall:hover{background:var(--bg)}
+.rcall .fn{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips2{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line2);color:var(--ink2)}
+.chip2 i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.newchip{font:600 11px var(--mono);color:var(--brand);background:var(--brand-soft);padding:1px 7px;border-radius:4px}
+@media(max-width:700px){.rcall{grid-template-columns:1fr auto}.rcall .chips2{grid-column:1/-1}}
+
+
+.rv{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.rv+.rv{margin-top:10px}
+.rv>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:14px 18px}
+.rv>summary::-webkit-details-marker{display:none}
+.rv[open]>summary{border-bottom:1px solid var(--line2)}
+.rv .nm{font:700 15px var(--display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rvbody{padding:16px 18px 18px;display:grid;gap:18px}
+.rvbody h4{margin:0 0 8px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rvflags{margin:0;padding-left:18px;font-size:13px;color:var(--ink2)}
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.radios label{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:7px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:13px;background:var(--panel)}
+.radios input{accent-color:var(--brand)}
+.radios label:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.rvrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:8px 16px;align-items:start;padding:10px 0;border-top:1px solid var(--line2)}
+.rvrow:first-of-type{border-top:0}
+.rvrow .pn{font-weight:600;font-size:13.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rvrow .why{font-size:13px;color:var(--ink2);margin-top:4px}.rvrow .ev2{font:400 12px var(--mono);color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+@media(max-width:760px){.rvrow{grid-template-columns:1fr}}
+.sel,.inp{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:var(--panel);color:var(--ink);width:100%}
+.sel:focus-visible,.inp:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.addrow{display:grid;grid-template-columns:1.2fr .8fr 1.4fr 1.4fr auto;gap:8px;align-items:center}
+@media(max-width:900px){.addrow{grid-template-columns:1fr 1fr}}
+.addedlist{display:grid;gap:6px;margin-bottom:8px}.addedl{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;background:var(--bg);border-radius:6px;padding:6px 10px}
+.rvfoot{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;border-top:1px solid var(--line2);padding-top:14px}
+.rvfoot .l{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{margin-left:auto;font:600 11px var(--mono);background:var(--nf-bg);color:var(--nf);border-radius:99px;padding:1px 8px}
+.ok-msg{font-size:13px;color:var(--pass);font-weight:600}
+
+
+.fx{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:1000px){.fx{grid-template-columns:1fr}}
+.fxlist{display:grid;gap:8px;position:sticky;top:16px}
+@media(max-width:1000px){.fxlist{position:static}}
+.fxitem{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px 14px;cursor:pointer;display:grid;gap:8px;text-align:left;font:inherit;color:inherit}
+.fxitem:hover{border-color:var(--muted)}.fxitem.sel{border-color:var(--brand);background:var(--brand-soft)}
+.fxitem b{font:700 14px/1.3 var(--display)}
+.pips{display:flex;gap:6px;align-items:center;font:500 11px var(--mono);color:var(--muted)}
+.pip{width:22px;height:6px;border-radius:3px;background:var(--line)}.pip.on{background:var(--pass)}.pip.mid{background:var(--nf)}.pip.na{background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 6px)}
+.step{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:18px 20px;display:grid;gap:14px}
+.step+.step{margin-top:12px}
+.step>h3{margin:0;font:700 17px var(--display);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sn{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--mono);background:var(--na-bg);color:var(--ink2)}
+.sn.done{background:var(--pass);color:#fff}.sn.mid{background:var(--nf);color:#fff}
+.diff{font:400 12.5px/1.6 var(--mono);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.diff div{padding:2px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.diff .ctx{color:var(--muted);background:var(--bg)}.diff .add{background:var(--pass-bg);color:var(--ink)}
+.diff .add::before{content:"+ ";color:var(--pass);font-weight:700}
+.scripts{display:grid;gap:6px}
+.script{border:1px solid var(--line2);border-radius:8px;padding:8px 12px;font-size:13px}
+.script summary{cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;list-style:none}
+.script summary::-webkit-details-marker{display:none}
+.script ol{margin:8px 0 0;padding-left:20px;color:var(--ink2)}
+.matrix{width:100%;border-collapse:collapse;font-size:13px}
+.matrix th{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.matrix td{padding:8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.cellbtn{border:1px dashed var(--line);border-radius:7px;background:none;padding:4px 10px;font:600 12px var(--body);color:var(--brand);cursor:pointer}
+.cellbtn:hover{border-color:var(--brand)}
+.runform{display:grid;gap:8px;border:1px solid var(--brand);border-radius:8px;padding:12px;background:var(--bg);margin-top:8px}
+.runform textarea{min-height:130px;font:400 13px/1.5 var(--mono)}
+.tl{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}.tl b{color:var(--ink);font-variant-numeric:tabular-nums}
+.how{font-size:13px;color:var(--ink2);background:var(--bg);border-radius:8px;padding:10px 14px}
+.how ol{margin:6px 0 0;padding-left:18px}
+
+
+/* ---------- review focus view ---------- */
+.rvhead{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.rvbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.rvbar .nm2{font:700 15px var(--display);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.nav2{display:flex;gap:6px;align-items:center;font:600 12.5px var(--mono);color:var(--muted)}
+.nav2 button{border:1px solid var(--line);background:var(--panel);border-radius:7px;width:30px;height:30px;font-size:15px;color:var(--ink);cursor:pointer}
+.nav2 button:disabled{opacity:.4;cursor:default}
+.rvwrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:1000px){.rvwrap{grid-template-columns:1fr}}
+.rvleft{position:sticky;top:12px;display:grid;gap:10px}
+@media(max-width:1000px){.rvleft{position:static}}
+.rvtx{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;max-height:62vh;overflow:auto;padding:6px}
+.tl{display:grid;grid-template-columns:40px 46px minmax(0,1fr) auto;gap:8px;align-items:start;padding:6px 8px;border-radius:7px;font-size:13.5px;cursor:default}
+.tl.seek{cursor:pointer}.tl.seek:hover{background:var(--bg)}
+.tl .tt{font:500 11.5px var(--mono);color:var(--muted);padding-top:2px}
+.tl .who{font:600 11.5px var(--mono);color:var(--muted);padding-top:2px}
+.tl.bot .who{color:var(--brand)}
+.tl.hl{background:var(--nf-bg)}
+.tl.live{outline:2px solid var(--brand);outline-offset:-2px}
+.marks{display:flex;gap:4px}
+.mk{min-width:20px;height:20px;border-radius:10px;background:var(--fatal);color:#fff;font:700 11px var(--mono);display:grid;place-items:center;padding:0 5px}
+.mk.nf{background:var(--nf)}
+.recbox{background:var(--brand-soft);border-radius:8px;padding:8px 12px;font-size:13px}
+.recbox b{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;margin-right:8px;color:var(--brand)}
+.rvright{display:grid;gap:14px}
+.rvright h3{margin:0;font:700 15px var(--display)}
+.pc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.pc.no{opacity:.75}
+.pch{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pch b{font-size:14px}
+.pcw{font-size:13.5px;color:var(--ink2)}
+.pce{font:400 12px/1.5 var(--mono);color:var(--muted);border-left:2px solid var(--line);padding-left:8px;overflow-wrap:anywhere}
+.hear{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 9px;font:600 12px var(--body);color:var(--brand);cursor:pointer;margin-left:auto}
+.hear:hover{border-color:var(--brand)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg2 button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 10px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
+.seg2 button.on.yes{background:var(--fatal-bg);border-color:var(--fatal);color:var(--fatal)}
+.seg2 button.on.no{background:var(--na-bg);border-color:var(--muted);color:var(--ink)}
+.rchips{display:flex;gap:6px;flex-wrap:wrap}
+.rchips button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 11px;font:500 12.5px var(--body);cursor:pointer;color:var(--ink2)}
+.rchips button.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);font-weight:600}
+.pc details summary{cursor:pointer;color:var(--muted);font-size:12.5px}
+.moreb{display:grid;gap:8px;margin-top:8px}
+.rvsave{position:sticky;bottom:0;background:var(--bg);padding:10px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line)}
+.toast{background:var(--pass-bg);color:var(--pass);font-weight:600;border-radius:8px;padding:8px 14px}
+
+.err-msg{color:var(--fatal);font-size:12px;margin-top:6px}
+main{padding:26px clamp(16px,3vw,40px) 60px;min-width:0;max-width:1680px;width:100%}
+/* ---------- primitives ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:18px 20px}
+.card+.card,.stack>*+*{margin-top:16px}
+.card h3{margin:0 0 12px;font:700 15px/1.3 var(--display);letter-spacing:-.005em}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:650;white-space:nowrap;line-height:1.6}
+.pill i{width:6px;height:6px;border-radius:50%;background:currentColor;display:block}
+.pill.Pass,.verdict.Pass{background:var(--pass-bg);color:var(--pass)}.pill.Non-Fatal,.verdict.Non-Fatal{background:var(--nf-bg);color:var(--nf)}
+.pill.Fatal,.verdict.Fatal{background:var(--fatal-bg);color:var(--fatal)}.pill.NA,.pill.run{background:var(--na-bg);color:var(--na)}
+.brand-pill{background:var(--brand-soft);color:var(--brand)}
+.muted{color:var(--muted)}.sm{font-size:12.5px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:r .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes r{to{transform:rotate(360deg)}}
+.btn{border:1px solid var(--line);background:var(--panel);padding:7px 14px;border-radius:9px;font-weight:600;font-size:13px}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn.primary:hover{filter:brightness(1.08);color:var(--brand-ink)}
+.btn:disabled{opacity:.55;cursor:default}
+a.btn{text-decoration:none;display:inline-block}
+.btn.tiny{padding:3px 9px;font-size:12px;font-weight:600}
+/* ---------- job header ---------- */
+.hero{display:grid;gap:14px}
+.hero h2{margin:0;font:700 22px/1.2 var(--display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.verdict{display:flex;align-items:center;gap:10px;padding:8px 16px 8px 12px;border-radius:12px;font:700 18px/1.2 var(--display)}
+.verdict small{display:block;font-size:11px;font-weight:600;opacity:.75;text-transform:uppercase;letter-spacing:.06em}
+.verdict .dot{width:12px;height:12px;border-radius:50%;background:currentColor}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:640px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--panel)}
+.tile b{font:700 26px/1.1 var(--display);display:block;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tile span{font-size:12px;color:var(--muted)}
+.tile.f b{color:var(--fatal)}.tile.n b{color:var(--nf)}.tile.p b{color:var(--pass)}.tile.r b{color:var(--brand)}
+audio{width:100%;height:38px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:22px 0 16px}
+.tab{background:none;border:0;padding:9px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}.tab.on{color:var(--brand);border-color:var(--brand)}
+.tab em{font-style:normal;background:var(--na-bg);color:var(--muted);border-radius:99px;padding:0 7px;margin-left:6px;font-size:11px}
+/* ---------- alerts ---------- */
+.alert{border-radius:12px;padding:12px 16px;background:var(--nf-bg);color:var(--nf);display:flex;gap:12px}
+.alert.bad{background:var(--fatal-bg);color:var(--fatal)}.alert.good{background:var(--pass-bg);color:var(--pass)}
+.alert ul{margin:4px 0 0;padding-left:18px}.alert b{display:block}
+/* ---------- compare ---------- */
+.cmp{display:grid;grid-template-columns:130px 1fr 1fr;gap:0;font-size:13.5px}
+.cmp>div{padding:8px 10px;border-bottom:1px solid var(--line2)}
+.cmp .h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.cmp .k{color:var(--muted)}
+@media(max-width:640px){.cmp{grid-template-columns:100px 1fr 1fr}}
+/* ---------- audit table ---------- */
+.grp{margin-top:6px}
+.grp h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.prow{border:1px solid var(--line);border-left-width:4px;border-radius:10px;margin-bottom:6px;background:var(--panel)}
+.prow.Fatal{border-left-color:var(--fatal)}.prow.Non-Fatal{border-left-color:#e9a23b}.prow.Pass{border-left-color:var(--pass)}.prow.NA{border-left-color:#c8cdd8}
+.prow.Fatal{background:linear-gradient(90deg,var(--fatal-bg),var(--panel) 30%)}
+.prow.Non-Fatal{background:linear-gradient(90deg,var(--nf-bg),var(--panel) 30%)}
+.prow summary{list-style:none;display:grid;grid-template-columns:minmax(160px,1fr) 96px 168px minmax(0,2fr);gap:12px;align-items:center;padding:9px 12px;cursor:pointer}
+.prow summary::-webkit-details-marker{display:none}
+.prow .nm{font-weight:600}.prow summary .pill{justify-self:start}.prow summary>span:nth-child(3){white-space:nowrap}
+.prow .ev{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow.NA .nm{color:var(--muted);font-weight:500}
+@media(max-width:700px){.prow summary{grid-template-columns:1fr auto}.prow .ev{display:none}}
+.pbody{padding:2px 14px 12px;font-size:13px;color:var(--ink2);display:grid;gap:4px}
+.pbody b{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--brand-soft);color:var(--brand)}
+.agree{height:8px;border-radius:99px;background:var(--fatal-bg);overflow:hidden;margin:8px 0 6px}
+.agree i{display:block;height:100%;background:var(--pass);border-radius:99px}
+/* ---------- transcript ---------- */
+.tx{display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;gap:10px;max-width:88%}
+.msg.buyer{align-self:flex-end;flex-direction:row-reverse}
+.av{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--brand-soft);color:var(--brand)}
+.msg.buyer .av{background:var(--pass-bg);color:var(--pass)}
+.bub{padding:8px 12px;border-radius:12px;background:var(--bot);font-size:14px}
+.msg.buyer .bub{background:var(--buyer)}
+.bub small{display:block;color:var(--muted);font-size:11px;margin-bottom:1px}
+.gap{align-self:center;font-size:12px;color:var(--nf);background:var(--nf-bg);padding:3px 12px;border-radius:99px}
+/* ---------- fixes / layer 2 ---------- */
+.issue{padding:0;overflow:hidden}
+.ihead{padding:16px 20px;display:grid;gap:6px}
+.ihead .t{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ihead .t b{font-size:15px}
+.patch{padding-right:70px!important;margin:10px 0 0;background:#0f1320;color:#e6e9f5;border-radius:10px;padding:12px 14px;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;position:relative}
+.patch .cp{position:absolute;top:8px;right:8px;background:#232a40;color:#e6e9f5;border-color:#3a4263}
+.l2{border-top:1px solid var(--line);padding:16px 20px;background:var(--bg)}
+.l2 h5{margin:0 0 4px;font-size:13px}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:10px 0 6px}
+.prog i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .4s}
+.verdict-banner{border-radius:12px;padding:14px 16px;margin:12px 0;display:flex;gap:12px;align-items:flex-start}
+.verdict-banner b{font-size:15px;display:block;text-transform:capitalize}
+.vb-improved{background:var(--pass-bg);color:var(--pass)}.vb-inconclusive,.vb-incomplete,.vb-no-change{background:var(--na-bg);color:var(--ink2)}
+.vb-worse,.vb-regression,.vb-error{background:var(--fatal-bg);color:var(--fatal)}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:760px){.metrics{grid-template-columns:1fr}}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.metric h6{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:72px 1fr 38px;gap:8px;align-items:center;font-size:12.5px}
+.bar .tr{height:10px;background:var(--line2);border-radius:99px;overflow:hidden;position:relative}
+.bar .tr i{display:block;height:100%;border-radius:99px}
+.bar.base i{background:#e08a8f}.bar.pat i{background:var(--brand)}.bar.ok i{background:var(--pass)}
+.gauge{position:relative}
+.gauge .tr{height:12px}.gauge .th{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.runs{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.runs th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.runs td{padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.convo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:6px 0 10px}
+.convo .tx{max-height:340px;overflow:auto}
+details.persona summary,details.runsd summary{cursor:pointer;color:var(--brand);font-weight:600;font-size:13px}
+.note{font-size:12.5px;color:var(--muted);line-height:1.5}
+.empty{text-align:center;padding:48px 20px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;text-align:left}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+.steps div{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+.steps b{display:block;margin-bottom:2px}
+.stepn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-size:12px;font-weight:700;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side">
+  <div class="brand"><div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12v0M8 8v8M12 4v16M16 8v8M20 12v0"/></svg></div><div>Vani Call Audit<span class="sub">self-auditing voice bot</span></div></div>
+  <nav class="nav" aria-label="Sections">
+    <button class="navbtn" id="navov"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h10M4 19h6"/></svg>Overview</button>
+    <button class="navbtn" id="navrv"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>Review queue<span class="badge" id="rvbadge" hidden></span></button>
+    <button class="navbtn" id="navfx"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l4 4M4 20l1-4L16 5l3 3L8 19l-4 1z"/></svg>Fixes</button>
+    <button class="navbtn" id="navaudit"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12v0M9 8v8M13 5v14M17 9v6M21 12v0"/></svg>Audit a call</button>
+    
+  </nav>
+  <div id="auditpane" hidden>
+  <div>
+    <p class="label">New audit</p>
+    <div class="drop" id="drop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg><b>Drop a call recording</b><span class="sm">or click to browse · mp3, wav, m4a</span></div>
+    <input type="file" id="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.opus,.flac,.amr" hidden>
+    
+    <div id="samples"></div>
+    <details class="paste"><summary>Or paste a chat transcript</summary>
+      <input id="tname" class="field" placeholder="Name, e.g. patched run 1">
+      <textarea id="ttext" class="field" rows="6" placeholder="Vani: हेलो, आपको ...&#10;Buyer: हाँ जी&#10;Vani: ..."></textarea>
+      <button class="btn primary" id="tgo" style="width:100%">Audit transcript</button>
+    </details>
+    <div id="uploaderr" class="err-msg"></div>
+  </div>
+  <div><p class="label">Recent audits</p><div class="jobs" id="jobs"></div><div class="sm muted" id="nojobs">No audits yet.</div></div>
+  </div>
+</aside>
+<main id="main"></main>
+<div id="tip" role="tooltip"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pill=(v,label)=>`<span class="pill ${esc(v)}"><i></i>${esc(label||v)}</span>`;
+const ui={tab:new URLSearchParams(location.search).get("tab")||"audit",filter:"all",open:{},runs:2,job:null,last:""};
+let current=location.hash.slice(1)||null,timer=null,viewSeq=0;
+$("#navaudit").onclick=()=>{location.hash="audits"};
+$("#navov").onclick=()=>{location.hash="overview"};
+$("#navrv").onclick=()=>{location.hash="review"};
+$("#navfx").onclick=()=>{location.hash="fixes"};
+
+async function api(path,opt){const r=await fetch(path,opt);const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j}
+function go(id){current=id;location.hash=id||"audits";ui.tab="audit";ui.last="";poll()}
+
+/* ---------- sidebar ---------- */
+async function upload(f){$("#uploaderr").textContent="";try{const j=await api("/api/audit?name="+encodeURIComponent(f.name),{method:"POST",body:f});go(j.id)}catch(e){$("#uploaderr").textContent=e.message}}
+$("#tgo").onclick=async()=>{$("#uploaderr").textContent="";try{const j=await api("/api/transcript",{method:"POST",body:JSON.stringify({name:$("#tname").value,text:$("#ttext").value})});go(j.id)}catch(e){$("#uploaderr").textContent=e.message}};
+const drop=$("#drop"),fi=$("#file");
+drop.onclick=()=>fi.click();fi.onchange=()=>fi.files[0]&&upload(fi.files[0]);
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("over")};drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over");e.dataTransfer.files[0]&&upload(e.dataTransfer.files[0])};
+async function loadSamples(){
+  const s=await api("/api/samples");
+  $("#samples").innerHTML=s.length?`<div class="sm muted" style="margin-top:12px">Audited samples</div><div class="chips">${s.map(n=>`<button class="sbtn" data-s="${esc(n)}">${esc(n.replace(".mp3",""))}</button>`).join("")}</div>`:"";
+  document.querySelectorAll("[data-s]").forEach(b=>b.onclick=async()=>go((await api("/api/sample",{method:"POST",body:JSON.stringify({name:b.dataset.s})})).id));
+}
+const ago=t=>{const s=Date.now()/1000-t;return s<90?"just now":s<5400?Math.round(s/60)+" min ago":s<129600?Math.round(s/3600)+" h ago":Math.round(s/86400)+" d ago"};
+async function loadJobs(){
+  const js=await api("/api/jobs");$("#nojobs").style.display=js.length?"none":"";
+  $("#jobs").innerHTML=js.map(j=>`<div class="job ${j.id===current?"sel":""}" data-id="${j.id}"><div class="row"><span class="fn" title="${esc(j.filename)}">${esc(j.filename)}</span>${j.overall?pill(j.overall):pill(j.status==="error"?"Fatal":"run",j.status==="error"?"Error":"Running")}</div><div class="when">${ago(j.created)}${j.flagged?" · ⚑ needs review":""}</div></div>`).join("");
+  document.querySelectorAll(".job").forEach(el=>el.onclick=()=>go(el.dataset.id));
+}
+
+/* ---------- polling ---------- */
+async function poll(){
+  clearTimeout(timer);loadJobs();const tok=++viewSeq;
+  const view=current==="review"?"review":current==="fixes"?"fixes":(!current||current==="overview")?"overview":current==="audits"?"audits":"job";
+  api("/api/live").then(L=>{const b=$("#rvbadge");b.hidden=!L.to_review;b.textContent=L.to_review}).catch(()=>{});
+  $("#navrv").classList.toggle("on",view==="review");$("#navfx").classList.toggle("on",view==="fixes");
+  $("#navov").classList.toggle("on",view==="overview");$("#navaudit").classList.toggle("on",view==="audits"||view==="job");
+  $("#auditpane").hidden=!(view==="audits"||view==="job");
+  const mm=$("#main");if(mm.dataset.shown!==view){mm.dataset.shown=view;ui.lastov="";ui.last="";}
+  if(view==="review"){renderReview();return}
+  if(view==="fixes"){renderFixes();return}
+  if(view==="overview"){renderOverview();timer=setTimeout(poll,6000);return}
+  if(view==="audits"){empty();return}
+  let j;try{j=await api("/api/job/"+current)}catch(e){if(tok===viewSeq)$("#main").innerHTML=`<div class="card">${esc(e.message)}</div>`;return}
+  if(tok!==viewSeq)return;
+  const sig=JSON.stringify(j)+ui.tab+ui.filter+ui.runs;
+  if(sig!==ui.last){ui.last=sig;ui.job=j;render(j)}
+  const testing=Object.values(j.tests||{}).some(t=>t.status==="running"||(t.result&&(t.result.cells||[]).some(c=>c.rendering)));
+  if(!["done","error"].includes(j.status)||testing)timer=setTimeout(poll,1800);
+}
+function empty(){$("#main").innerHTML=`<div class="card empty"><h2 style="margin:0 0 6px;font-size:20px">Audit a Vani call in a minute</h2><div class="muted">Grades every call against the quality rubric, explains the failures, proposes prompt fixes and tests them with simulated buyers.</div>
+<div class="steps"><div><span class="stepn">1</span><b>Upload</b><span class="sm muted">Drop a recording. It is transcribed with bot and buyer separated.</span></div><div><span class="stepn">2</span><b>Audit</b><span class="sm muted">Each rubric parameter gets Pass, Non-Fatal or Fatal with quoted evidence; uncertain calls go to a human queue.</span></div><div><span class="stepn">3</span><b>Fix and test</b><span class="sm muted">Get a prompt patch per root cause, then test it against simulated buyers before shipping.</span></div></div></div>`}
+
+/* ---------- render ---------- */
+const STEP={queued:"Queued",transcribe:"Transcribing and separating bot / buyer speech (30-60 s)",judge:"Auditing against the rubric with two independent judge runs",suggest:"Working out root causes and prompt fixes"};
+const GROUPS=[["Intent",["Outcome Accuracy"]],["Quantity",["Quantity Accuracy","Quantity Unit Accuracy","Quantity Probing Error","Qty Missed Opportunity"]],["Specifications",["Spec1 Accuracy","Spec2 Accuracy","Spec Missed Opportunity"]],["Conversation quality",["Looping Behavior","Dead air","WER"]],["Capture and routing",["Additional Details","Product Change Accuracy","Category ISQ Error","MCAT Search Error","OnCall AstBuy Error"]]];
+
+function render(j){
+  const m=$("#main");
+  if(j.status==="error"){m.innerHTML=`<div class="card"><h2 style="margin:0 0 8px">${esc(j.filename)}</h2><div class="alert bad"><div><b>This audit failed</b>${esc(j.error||j.message)}</div></div></div>`;return}
+  if(j.status!=="done"){m.innerHTML=`<div class="card hero"><h2>${esc(j.filename)}</h2><div><span class="spin"></span>${esc(STEP[j.status]||j.message)}</div><div class="note">Keep this page open, it updates itself.</div></div>`;return}
+  const r=j.report,cnt=v=>r.rows.filter(x=>x.verdict===v).length,issues=j.issues||[];
+  const col={Fatal:"Fatal",Pass:"Pass","Non-Fatal":"Non-Fatal"}[r.overall];
+  let h=`<div class="card hero"><div class="sp"><div><h2>${esc(j.filename)}</h2><div class="sm muted">${r.transcript.length} speech segments · ${esc(r.source)}</div></div>
+    <div class="verdict ${col}"><span class="dot"></span><div><small>Overall</small>${esc(r.overall)}</div></div></div>
+    ${j.audio?`<audio controls preload="none" src="/api/audio/${j.id}/${esc(j.audio)}"></audio>`:`<div class="note">Pasted transcript: no audio, so dead air and pronunciation are not assessed.</div>`}
+    <div class="tiles"><div class="tile f"><b>${cnt("Fatal")}</b><span>Fatal</span></div><div class="tile n"><b>${cnt("Non-Fatal")}</b><span>Non-Fatal</span></div><div class="tile p"><b>${cnt("Pass")}</b><span>Pass</span></div><div class="tile r"><b>${r.risk.reasons.length}</b><span>Review flags</span></div></div></div>
+    <div class="tabs">${[["audit","Audit"],["tx","Transcript"],["fix","Fixes and tests"]].map(([k,t])=>`<button class="tab ${ui.tab===k?"on":""}" data-tab="${k}">${t}${k==="fix"?`<em>${issues.length}</em>`:""}</button>`).join("")}</div>`;
+  h+=ui.tab==="audit"?auditTab(j):ui.tab==="tx"?txTab(r):fixTab(j);
+  m.innerHTML=h;wire(j);
+}
+
+function auditTab(j){
+  const r=j.report,hu=j.human,hm={};if(hu)hu.rows.forEach(x=>hm[x.parameter]=x);
+  const by={};r.rows.forEach(x=>by[x.parameter]=x);
+  let h="";
+  if(r.incomplete)h+=`<div class="alert bad"><div><b>This audit is incomplete</b>The judge answered too few checks, so no verdict is shown and the call is left out of the dashboard totals. <button class="btn" id="reaudit" style="margin-left:8px">Run the audit again</button></div></div>`;
+  h+=r.risk.flag?`<div class="alert"><div><b>⚑ Human review queue</b><ul>${r.risk.reasons.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`:`<div class="alert good"><div><b>No risk flags</b>Auto-graded with confidence; no human review needed.</div></div>`;
+  if(hu){const pc=Math.round(hu.agree/hu.total*100);h+=`<div class="card" style="margin-top:16px"><div class="sp"><h3 style="margin:0">Agreement with the human audit</h3><span class="sm muted">offer ${esc(hu.offer_id)}</span></div>
+    <div class="agree"><i style="width:${pc}%"></i></div><div class="sm"><b>${hu.agree} of ${hu.total}</b> parameters agree (${pc}%) · human overall ${pill(hu.human_overall)} · agent overall ${pill(r.overall)}</div>${hu.human_remarks?`<div class="note" style="margin-top:6px">Auditor remark: ${esc(hu.human_remarks)}</div>`:""}</div>`}
+  const f=r.facts;
+  h+=`<div class="card" style="margin-top:16px"><h3>What the buyer said vs what Vani captured</h3><div class="cmp"><div class="h"></div><div class="h">Buyer said</div><div class="h">Vani captured</div>
+    <div class="k">Product</div><div>${esc(f.buyer_product)}</div><div></div>
+    <div class="k">Quantity</div><div>${esc(f.buyer_quantity_and_unit)}</div><div>${esc(f.bot_quantity_captured)}</div>
+    <div class="k">Specs</div><div>${esc(f.buyer_specs_stated)}</div><div>${esc(f.bot_specs_captured)}</div></div>
+    ${r.recorded_values_used?`<div class="note" style="margin-top:10px"><b>Compared with the values the bot recorded for this call.</b></div>`:""}
+    ${r.observation?`<div class="note" style="margin-top:10px"><b>Observation:</b> ${esc(r.observation)}</div>`:""}</div>`;
+  h+=`<div class="card" style="margin-top:16px"><div class="sp"><h3 style="margin:0">Rubric audit</h3><div class="seg"><button data-filter="all" class="${ui.filter==="all"?"on":""}">All</button><button data-filter="issues" class="${ui.filter==="issues"?"on":""}">Issues only</button></div></div>`;
+  GROUPS.forEach(([g,ps])=>{
+    const rows=ps.map(p=>by[p]).filter(x=>x&&(ui.filter==="all"||x.verdict==="Fatal"||x.verdict==="Non-Fatal"));
+    if(!rows.length)return;
+    h+=`<div class="grp"><h4>${g}</h4>`+rows.map(x=>{const hv=hm[x.parameter],key="p:"+x.parameter;
+      return `<details class="prow ${x.verdict}" data-key="${key}" ${ui.open[key]?"open":""}><summary><span class="nm">${esc(x.parameter)}</span>${pill(x.verdict)}<span>${hv?(hv.match?`<span class="sm muted">human: ${esc(hv.human)} ✓</span>`:`<span class="sm" style="color:var(--nf)">human: ${esc(hv.human)}</span>`):""}${x.disputed?` <span title="the two judge runs disagreed" class="sm" style="color:var(--nf)">⚑ disputed</span>`:""}</span><span class="ev">${esc(x.evidence)}</span></summary>
+      <div class="pbody"><div><b>Rule</b><br>${esc(x.rule)}</div>${x.evidence?`<div><b>Evidence</b><br>${esc(x.evidence)}</div>`:""}${x.reason&&x.verdict!=="NA"?`<div><b>Why</b><br>${esc(x.reason)}</div>`:""}${x.verdict!=="NA"?`<div class="note">Confidence: ${esc(x.confidence)}</div>`:""}</div></details>`}).join("")+`</div>`;
+  });
+  h+=`<div class="note" style="margin-top:12px">Severity is decided in code from the rubric table; the model only reports facts. Pronunciation, MCAT search and seller-pitch status cannot be fully judged from text.</div></div>`;
+  return h;
+}
+
+function txTab(r){
+  const items=r.transcript.map(e=>({t:e.start_time_seconds,h:bubble(String(e.speaker_id)==="0"?"bot":"buyer",e.transcript,e.start_time_seconds)}));
+  (r.dead_air_gaps||[]).forEach(g=>items.push({t:g.from+.01,h:`<div class="gap">${g.seconds}s silence ${g.after_handover?"after handover to seller (not counted)":"counted as dead air"}</div>`}));
+  return `<div class="card"><div class="tx">${items.sort((a,b)=>a.t-b.t).map(x=>x.h).join("")}</div></div>`;
+}
+const bubble=(w,t,s)=>`<div class="msg ${w}"><div class="av">${w==="bot"?"V":"B"}</div><div class="bub">${s!=null?`<small>${w==="bot"?"Vani":"Buyer"} · ${(+s).toFixed(1)}s</small>`:`<small>${w==="bot"?"Vani":"Buyer"}</small>`}${esc(t)}</div></div>`;
+
+function fixTab(j){
+  const iss=j.issues||[];
+  if(j.suggest_error)return `<div class="alert bad"><div><b>Fix suggestion failed</b>${esc(j.suggest_error)}</div></div>`;
+  if(!iss.length)return `<div class="card"><b>Nothing to fix.</b><div class="muted">No failed checks in this call.</div></div>`;
+  const ctrl=(j.tests&&Object.values(j.tests).find(t=>t.control_names!=null));
+  return `<div class="stack">`+iss.map((is,i)=>{
+    const t=(j.tests||{})[i],noPatch=is.proposed_patch.startsWith("NO PROMPT PATCH");
+    return `<div class="card issue"><div class="ihead"><div class="t"><b>${esc(is.parameter)}</b><span class="pill NA">${esc(is.layer.replace("_"," "))}</span></div>
+      <div>${esc(is.root_cause)}</div><div class="sm muted">${noPatch?"Recommended action":"Proposed prompt patch"} · ${esc(is.patch_location)}</div>
+      <div class="patch"><button class="btn tiny cp" data-copy="${i}">Copy</button>${esc(is.proposed_patch)}</div>
+      <details class="persona" data-key="s:${i}" ${ui.open["s:"+i]?"open":""} style="margin-top:6px"><summary>Test scenario</summary><div class="sm" style="margin-top:6px"><b>Buyer to simulate:</b> ${esc(is.buyer_persona)}<br><b>Correct behaviour:</b> ${esc(is.expected_behaviour)}</div></details></div>
+      <div class="l2">${noPatch?`<div class="note">This is not a prompt issue, so there is nothing to test by simulation. Pass it to the team named above.</div>`:l2(j,i,t)}</div></div>`}).join("")+`</div>`;
+}
+
+function l2(j,i,t){
+  if(t&&t.status==="running"){const pc=t.total?Math.round(t.done/t.total*100):4;return `<h5>Layer 2 test running</h5><div class="prog"><i style="width:${pc}%"></i></div><div class="sm"><span class="spin"></span>${esc(t.message)}</div>`}
+  let h="";
+  if(t&&t.status==="error")h+=`<div class="alert bad" style="margin-bottom:10px"><div><b>Test failed</b>${esc(t.message)}</div></div>`;
+  h+=`<div class="sp"><div><h5>Layer 2 · simulated buyers</h5><div class="note">Replays this buyer (3 styles) against the current prompt and the patched prompt, audits every call with the same rubric, and checks the simulator reproduces the original failure before trusting the result.</div></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="sm muted">Runs per cell</span><div class="seg">${[1,2,3].map(n=>`<button data-runs="${n}" class="${ui.runs===n?"on":""}">${n}</button>`).join("")}</div><button class="btn primary" data-test="${i}">${t&&t.result?"Re-run":"Run"} test</button></div></div>`;
+  if(t&&t.status==="done"){
+    if(!t.result.cells)return h+`<div class="note" style="margin-top:10px">This result is from an older test format. Re-run to get the Layer 2 analysis.</div>`;
+    h+=resultHtml(j.id,i,t)}
+  return h;
+}
+
+function bar(label,n,total,cls){const p=total?Math.round(n/total*100):0;return `<div class="bar ${cls}"><span>${label}</span><div class="tr"><i style="width:${p}%"></i></div><span>${n}/${total}</span></div>`}
+function resultHtml(id,i,t){
+  const res=t.result,s=res.summary,v=s.verdict,icon={improved:"✓",inconclusive:"?","no change":"=",worse:"✕",regression:"✕",error:"!"}[v]||"";
+  let h=`<div class="verdict-banner vb-${v.replace(" ","-")}"><span style="font-size:20px;line-height:1">${icon}</span><div><b>${esc(v)}</b>${esc(s.why)}</div></div>`;
+  const rp=Math.round(s.reproduction_rate*100);
+  h+=`<div class="metrics">
+    <div class="metric"><h6>Simulator validity</h6><div class="gauge"><div class="bar ${rp>=30?"ok":"base"}" style="grid-template-columns:1fr 38px"><div class="tr"><i style="width:${rp}%"></i></div><span>${rp}%</span></div><div class="th" style="left:30%"></div></div><div class="note" style="margin-top:6px">Unpatched calls that reproduced the original failure. Needs 30% or more (line) to trust the comparison.</div></div>
+    <div class="metric"><h6>Targeted failure: ${esc(res.parameter)}</h6><div class="bars">${bar("Unpatched",s.baseline.failed,s.baseline.n,"base")}${bar("Patched",s.patched.failed,s.patched.n,"pat")}</div><div class="note" style="margin-top:6px">Simulated calls where this check failed. Lower is better.</div></div>
+    <div class="metric"><h6>Regression (passing calls)</h6>${s.has_controls?`<div class="bars">${bar("Unpatched",s.control_baseline.fatal,s.control_baseline.n,"base")}${bar("Patched",s.control_patched.fatal,s.control_patched.n,"pat")}</div><div class="note" style="margin-top:6px">Fatal results on calls that were already good.</div>`:`<div class="note">No passing call audited yet. Audit one (for example sample 144800859863) so patches can be checked for breakage.</div>`}</div></div>`;
+  const p=res.persona;
+  h+=`<details class="persona" data-key="pe:${i}" ${ui.open["pe:"+i]?"open":""} style="margin-top:12px"><summary>Simulated buyer</summary><div class="sm" style="margin-top:6px">${esc(p.product)} · ${esc(p.true_quantity_and_unit)} · ${esc(p.location)}<br>Specs: ${esc(p.specs_known.join(", ")||"not stated")}<br>Volunteers: ${esc(p.volunteers.join("; ")||"nothing")}<br>Quirks: ${esc(p.quirks.join("; ")||"none")}<br>Language: ${esc(p.language_style)} · Patience: ${esc(p.patience)}</div></details>`;
+  h+=`<details class="runsd" data-key="ru:${i}" ${ui.open["ru:"+i]?"open":""} style="margin-top:10px"><summary>All ${res.cells.length} simulated calls</summary><table class="runs"><tr><th>Buyer</th><th>Prompt</th><th>Overall</th><th>Target</th><th></th></tr>`;
+  res.cells.forEach((c,k)=>{const key=`c:${i}:${k}`;
+    h+=`<tr><td>${c.kind==="control"?"control · ":""}${esc(c.style)}</td><td>${c.arm==="patched"?"Patched":"Unpatched"}</td><td>${c.overall?pill(c.overall):pill("Fatal","error")}</td><td>${c.error?"":c.target_failed?pill("Fatal","failed"):pill("Pass","ok")}</td><td style="text-align:right">${c.conversation.length?`<button class="btn tiny" data-conv="${key}">${ui.open[key]?"Hide":"View"}</button>`:""}</td></tr>`;
+    if(ui.open[key])h+=`<tr><td colspan="5"><div class="convo"><div class="tx">${c.conversation.map(([w,tx])=>bubble(w,tx)).join("")}</div>
+      <div style="margin-top:10px">${c.audio?`<audio controls src="/api/audio/${id}/${c.audio}?test=${i}"></audio>`:c.rendering?`<span class="spin"></span><span class="sm">Generating audio…</span>`:`<button class="btn tiny" data-render="${i}:${k}">Generate audio</button>${c.audio_error?` <span class="sm" style="color:var(--fatal)">${esc(c.audio_error)}</span>`:""}`}</div>
+      ${c.failures.length?`<div class="note" style="margin-top:8px">Failed checks: ${esc(c.failures.map(f=>f.parameter+" ("+f.verdict+")").join(", "))}</div>`:""}</div></td></tr>`});
+  h+=`</table></details><div class="note" style="margin-top:10px">${res.cells.length} simulated calls. Counts are small, so treat "improved" as strong evidence to try the patch on real traffic, not proof. The simulated bot uses the prompt's core plus relevant excerpts, not the full production prompt.</div>`;
+  return h;
+}
+
+function wire(j){
+  const m=$("#main");
+  m.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{ui.tab=b.dataset.tab;render(j)});
+  const ra=$("#reaudit");if(ra)ra.onclick=async()=>{ra.disabled=true;ra.textContent="Starting…";try{await api(`/api/job/${j.id}/reaudit`,{method:"POST",body:"{}"});ui.last="";poll()}catch(e){alert(e.message);ra.disabled=false}};
+  m.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{ui.filter=b.dataset.filter;ui.last="";poll()});
+  m.querySelectorAll("details[data-key]").forEach(d=>d.addEventListener("toggle",()=>{ui.open[d.dataset.key]=d.open}));
+  m.querySelectorAll("[data-runs]").forEach(b=>b.onclick=()=>{ui.runs=+b.dataset.runs;ui.last="";poll()});
+  m.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(j.issues[+b.dataset.copy].proposed_patch);b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200)});
+  m.querySelectorAll("[data-test]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api(`/api/job/${j.id}/test`,{method:"POST",body:JSON.stringify({issue:+b.dataset.test,runs:ui.runs})});ui.last="";poll()}catch(e){alert(e.message);b.disabled=false}});
+  m.querySelectorAll("[data-conv]").forEach(b=>b.onclick=()=>{ui.open[b.dataset.conv]=!ui.open[b.dataset.conv];ui.last="";poll()});
+  m.querySelectorAll("[data-render]").forEach(b=>b.onclick=async()=>{const[i,c]=b.dataset.render.split(":");b.disabled=true;try{await api(`/api/job/${j.id}/render`,{method:"POST",body:JSON.stringify({issue:+i,cell:+c})});ui.last="";poll()}catch(e){alert(e.message);b.disabled=false}});
+}
+window.addEventListener("hashchange",()=>{const id=location.hash.slice(1)||null;if(id!==current){current=id;ui.last="";poll()}});
+
+/* ---------- batch results ---------- */
+let batchData=null;
+async function renderBatch(){
+  const m=$("#main");
+  try{if(!batchData)batchData=await api("/api/batch")}catch(e){m.innerHTML=`<div class="card"><h3>Batch results</h3><div class="muted">No batch run yet. Run <code>python3 src/batch.py 10</code>.</div></div>`;return}
+  const s=batchData.summary,R=batchData.results.filter(r=>!r.error);
+  const pct=x=>{const[a,b]=x.split("/").map(Number);return b?Math.round(a/b*100):0};
+  const oq=s.vs_overall_quality,cq=s.vs_call_quality;
+  const tile=(v,l,c)=>`<div class="tile ${c||""}"><b>${v}</b><span>${l}</span></div>`;
+  let h=`<div class="card hero"><div class="sp"><div><h2>Batch results</h2><div class="sm muted">${s.calls_audited} human-labelled SquadStack calls, audited by the same pipeline as the Audit page and compared with the auditors' labels</div></div></div>
+   <div class="tiles">${tile(Math.round(s.share_audited*100)+"%","of calls audited","r")}${tile(s.parameter_agreement_pct+"%","parameter agreement ("+s.parameter_agreement_lenient+")","p")}${tile(oq.exact,"overall verdict exact match","p")}${tile(oq.fatal_recall,"human-Fatal calls caught","p")}</div>
+   <div class="tiles">${tile(oq.fatal_precision,"agent-Fatal calls also Fatal for humans","n")}${tile(s.calls_flagged,"calls in the review queue","n")}${tile(s.disagreements_caught_by_review_flag,"disagreements caught by a flag","r")}${tile(s.disagreements,"parameter disagreements","f")}</div>
+   <div class="note">Small sample (${s.calls_audited} calls): treat these as a first read, not a final number. Pass and NA are counted as the same. The human Overall Quality also includes lead-quality ratings that a transcript cannot show; the conversation-only comparison (Call Quality) is exact on ${cq.exact}.</div></div>`;
+  const labels=["Fatal","Non-Fatal","Pass"];
+  const mx=(c,title)=>{const rows=Object.keys(c).filter(k=>labels.includes(k)).sort((a,b)=>labels.indexOf(a)-labels.indexOf(b));
+    return `<div><b class="sm">${title}</b><table class="mx" style="margin-top:6px"><tr><th>human \\ agent</th>${labels.map(l=>`<th>${l}</th>`).join("")}</tr>${rows.map(r=>`<tr><th>${r}</th>${labels.map(l=>{const n=c[r][l]||0;return `<td class="${!n?"z":r===l?"hit":"bad"}">${n}</td>`}).join("")}</tr>`).join("")}</table></div>`};
+  h+=`<div class="card"><h3>Overall verdict: human vs agent</h3><div class="cols">${mx(oq.confusion_human_to_agent,"Against the human Overall Quality")}${mx(cq.confusion_human_to_agent,"Against the human Call Quality (conversation only)")}</div>
+   <div class="note" style="margin-top:8px">Green is agreement; red is disagreement. The agent keeps the more severe reading when its two judge runs differ, so it errs towards Fatal.</div></div>`;
+  const dp=s.disagreements_by_parameter,mxd=Math.max(1,...Object.values(dp).map(v=>v.length));
+  h+=`<div class="card"><h3>Where agent and human disagree</h3>`+Object.entries(dp).map(([k,v])=>`<div class="bar" style="grid-template-columns:200px 1fr 34px;margin-bottom:6px"><span>${esc(k)}</span><div class="tr"><i style="width:${v.length/mxd*100}%;background:var(--brand)"></i></div><span>${v.length}</span></div>`).join("")+`<div class="note">Each disagreement is shown as human to agent, for example "Pass to Fatal" means the human passed it and the agent called it Fatal.</div></div>`;
+  h+=`<div class="card"><h3>Every call</h3>`+batchData.results.map(r=>{
+    if(r.error)return `<div class="bcall"><div style="padding:9px 12px"><b>${esc(r.offer)}</b> <span class="sm" style="color:var(--fatal)">${esc(r.error)}</span></div></div>`;
+    const bad=r.rows.filter(c=>!(c.human===c.agent||(["Pass","NA"].includes(c.human)&&["Pass","NA"].includes(c.agent))));
+    const key="b:"+r.offer;
+    return `<details class="bcall" data-key="${key}" ${ui.open[key]?"open":""}><summary><b>${esc(r.offer)}</b><span class="sm">human ${pill(r.human_overall)}</span><span class="sm">agent ${pill(r.agent_overall)}</span><span class="sm ${bad.length?"":"muted"}">${bad.length?bad.length+" disagree":"all agree"}</span><span class="sm">${r.flagged?"⚑ review":""}</span></summary>
+     <div style="padding:2px 14px 12px"><div class="dline"><span class="muted">Human Call Quality</span><span>${pill(r.human_call)}</span></div>`+
+     r.rows.filter(c=>!(c.human==="NA"&&c.agent==="NA")).map(c=>{const ok=c.human===c.agent||(["Pass","NA"].includes(c.human)&&["Pass","NA"].includes(c.agent));
+       return `<div class="dline"><span>${esc(c.parameter)}${c.disputed?' <span class="sm" style="color:var(--nf)">⚑ disputed</span>':""}</span><span>${pill(c.human)} → ${pill(c.agent)} ${ok?"":'<b style="color:var(--fatal)">✕</b>'}</span></div>`}).join("")+
+     (r.flags.length?`<div class="note" style="margin-top:8px"><b>Review flags:</b> ${esc(r.flags.join("; "))}</div>`:"")+`</div></details>`}).join("")+`</div>`;
+  m.innerHTML=h;
+  m.querySelectorAll("details[data-key]").forEach(d=>d.addEventListener("toggle",()=>{ui.open[d.dataset.key]=d.open}));
+}
+
+
+/* ---------- fixes ---------- */
+let fxList=null,fxSel=null,fxD=null,fxForm=null,fxMsg="",fxBusy="";
+const ARM={baseline:"Current prompt",patched:"Patched prompt"};
+const fdate=t=>t?new Date(t*1000).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+function pips(pg,fixOnly){const a=pg.prompt_fix;
+  const st=[a?(pg.patch_done?"on":""):"na",a?(pg.tested?"on":(pg.pack_done||pg.runs_have)?"mid":""):"na",pg.summary&&a?(pg.tested?"on":"mid"):(a?"":"na"),pg.decided?"on":""];
+  return `<span class="pips">${st.map(c=>`<i class="pip ${c}"></i>`).join("")}</span>`}
+async function fxApi(act,body){fxBusy=act;fxMsg="";renderFixes(true);try{fxD=await api(`/api/fix/${fxSel}/${act}`,{method:"POST",body:JSON.stringify(body||{})})}catch(e){fxMsg=e.message}fxBusy="";fxList=await api("/api/fixes");renderFixes(true)}
+async function renderFixes(keep){
+  const m=$("#main"),my=viewSeq;
+  if(!keep||!fxList){try{fxList=await api("/api/fixes")}catch(e){if(my===viewSeq)m.innerHTML=`<div class="card">${esc(e.message)}</div>`;return}}
+  if(my!==viewSeq)return;
+  if(!fxList.length){m.innerHTML=`<div class="card"><h3>No fixes yet</h3><div class="muted">Fixes appear here once a grouping with proposed fixes exists.</div></div>`;return}
+  if(!fxSel||!fxList.find(f=>f.id===fxSel))fxSel=fxList[0].id;
+  if(!keep||!fxD||fxD.id!==fxSel){try{fxD=await api("/api/fix/"+fxSel)}catch(e){}}
+  if(my!==viewSeq)return;
+  const d=fxD,pg=d.progress,fx=d.fix,pf=pg.prompt_fix;
+  const sig=JSON.stringify([fxSel,d.patch&&d.patch.built_at,d.pack&&d.pack.created_at,d.runs.length,d.decision&&d.decision.at,fxForm,fxBusy,fxMsg,fxList.length]);
+  let h=`<div class="ov"><header><p class="eyebrow">Fixes</p><h1>From suggestion to tested change</h1>
+   <p class="lede">Each suggested fix goes through four steps: build the patched prompt, test it on fixed buyer scripts against both prompts, read the result, and decide. Nothing here changes the live bot. An approved fix is a recorded change request for your team.</p></header>
+   <div class="fx"><div class="fxlist">`+fxList.map(f=>`<button class="fxitem ${f.id===fxSel?"sel":""}" data-fx="${f.id}"><span class="pips" style="justify-content:space-between"><span>#${f.rank} &middot; ${f.calls} calls</span><span class="tag ${f.fix.fix_type==="prompt_patch"?"":"mute"}">${esc(FIXT[f.fix.fix_type]||f.fix.fix_type)}</span></span><b>${esc(f.title)}</b>${pips(f.progress)}</button>`).join("")+`</div><div>`;
+  // step 1
+  h+=`<div class="step"><h3><span class="sn ${pf?(d.patch?"done":""):""}">1</span>The change<span class="tag ${pf?"":"mute"}">${esc(FIXT[fx.fix_type]||fx.fix_type)}</span></h3>
+    <div class="psum" style="margin:0"><b>${esc(d.title)}</b><br>${esc(d.plain_summary)}</div>
+    <div class="change">${esc(fx.change)}</div>
+    <dl class="kv2"><dt>Where it goes</dt><dd>${esc(fx.where)}</dd><dt>Already in the prompt?</dt><dd><div class="callout ${/^no existing/i.test(fx.already_covered)?"ok":""}">${esc(fx.already_covered)}</div></dd><dt>What could go wrong</dt><dd>${esc(fx.risk)}</dd></dl>`;
+  if(!pf)h+=`<div class="callout">This is not a prompt change, so there is nothing to patch or test by chat. Hand it to the owner named above, then record the decision in step 4.</div>`;
+  else if(!d.patch)h+=`<div><button class="btn primary" id="fxpatch" ${fxBusy?"disabled":""}>${fxBusy==="patch"?"Building…":"Build the patched prompt"}</button></div>`;
+  else h+=`<div class="sm muted">Rule inserted after prompt line ${d.patch.anchor_line} &middot; ${d.patch.chars_before.toLocaleString()} → ${d.patch.chars_after.toLocaleString()} characters &middot; built ${fdate(d.patch.built_at)}</div>
+    <div class="diff">${d.patch.before.map(l=>`<div class="ctx">${esc(l)}</div>`).join("")}<div class="add">${esc(d.patch.inserted)}</div>${d.patch.after.map(l=>`<div class="ctx">${esc(l)}</div>`).join("")}</div>
+    <div class="fixfoot"><a class="btn" href="/api/fix/${d.id}/prompt">Download the patched prompt</a><button class="btn" id="fxpatch">Rebuild</button></div>`;
+  h+=`</div>`;
+  // step 2
+  if(pf){const sc=d.pack?d.pack.scripts:[],runs=d.runs;
+    h+=`<div class="step"><h3><span class="sn ${pg.tested?"done":(d.pack?"mid":"")}">2</span>The test<span class="muted sm">${pg.runs_need?`${pg.runs_have} of ${pg.runs_need} runs graded`:"not started"}</span></h3>`;
+    if(!d.pack){h+=`<div class="how">A <b>test pack</b> is a fixed set of buyer scripts: 5 that trigger this problem and 3 ordinary buyers. Both prompts face exactly the same buyers, so the comparison is fair. The scripts are written for the product your test agent is set up with. Read them before you run them: they are drafted by a model and a person should edit any that sound unnatural.</div>
+      <div class="addrow" style="grid-template-columns:1fr 2fr"><input class="inp" id="fxprod" value="Plastic Bags" aria-label="Product"><input class="inp" id="fxopts" value='{"Size": ["8x10 inch", "9x13 inch"], "Material": ["Virgin", "HMHDPE", "LDPE"]}' aria-label="Option lists"></div>
+      <div><button class="btn primary" id="fxpack" ${fxBusy?"disabled":""}>${fxBusy==="pack"?"Writing scripts…":"Create the test pack"}</button></div>`}
+    else{h+=`<div class="how"><b>How to run it.</b> The test agent must have these variables: product <b>${esc(d.pack.product)}</b>, options <code>${esc(d.pack.options)}</code>.<ol>
+        <li>Put the <b>current</b> prompt in the test agent. For each script, play the buyer lines in order in the agent's test chat. Copy the chat and add it below under <i>Current prompt</i>.</li>
+        <li>Put the <b>patched</b> prompt (download in step 1) in the agent. Play the same scripts again and add them under <i>Patched prompt</i>.</li>
+        <li>Each run is graded automatically. Or ask Claude to drive the agent for you.</li></ol></div>
+      <div class="scripts">`+sc.map(x=>`<details class="script"><summary><span class="tag ${x.kind==="control"?"mute":""}">${x.kind}</span><b>${esc(x.title)}</b><span class="muted">${esc(x.persona)}</span></summary><ol>${x.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ol><div class="note" style="margin-top:6px"><b>A correct bot:</b> ${esc(x.expect)}</div></details>`).join("")+`</div>
+      <div style="overflow-x:auto"><table class="matrix"><tr><th>Script</th><th>${ARM.baseline}</th><th>${ARM.patched}</th></tr>`+
+      sc.map(x=>`<tr><td><span class="tag ${x.kind==="control"?"mute":""}">${x.kind}</span> ${esc(x.title)}</td>`+["baseline","patched"].map(arm=>{const r=runs.find(q=>q.arm===arm&&q.script===x.id),k=arm+":"+x.id;
+        return `<td>${r?`<span title="${esc(r.reason||"")}">${pill(r.met?"Pass":"Fatal",r.met?"Bot correct":"Bot wrong")}</span>${r.disputed?` <span class="sm" style="color:var(--nf)" title="The two checks disagreed">⚑</span>`:""} <button class="cellbtn" data-run="${k}">redo</button>`:`<button class="cellbtn" data-run="${k}">${fxBusy==="run"&&fxForm===k?"Grading…":"Add run"}</button>`}${fxForm===k?`<div class="runform"><textarea class="inp" id="fxtext" placeholder="Paste the chat. Start each line with Vani: or Buyer:"></textarea><input class="inp" id="fxby" placeholder="Your name" value="${esc(localStorage.getItem("reviewer")||"")}"><div class="fixfoot"><button class="btn primary" data-runsave="${k}" ${fxBusy?"disabled":""}>${fxBusy==="run"?"Grading…":"Grade this run"}</button><button class="btn" data-runcancel>Cancel</button></div></div>`:""}</td>`}).join("")+`</tr>`).join("")+`</table></div>`}
+    h+=(fxMsg?`<div class="callout" style="border-color:var(--fatal)">${esc(fxMsg)}</div>`:"")+`</div>`;
+    // step 3
+    const S=pg.summary;
+    h+=`<div class="step"><h3><span class="sn ${S&&pg.tested?"done":(S?"mid":"")}">3</span>The result</h3>`;
+    if(!S)h+=`<div class="muted">Appears once runs are graded.</div>`;
+    else{const v=S.verdict,rp=Math.round(S.reproduction_rate*100);
+      h+=(pg.tested?"":`<div class="note">Partial: ${pg.runs_have} of ${pg.runs_need} runs graded, so this can still change.</div>`)+`<div class="verdict-banner vb-${v.replace(" ","-")}"><span style="font-size:20px;line-height:1">${{improved:"✓",inconclusive:"?",incomplete:"…","no change":"=",worse:"✕",regression:"✕",error:"!"}[v]||""}</span><div><b>${esc(v)}</b>${esc(S.why)}</div></div>
+      <div class="metrics"><div class="metric"><h6>Does the current prompt show the problem?</h6><div class="gauge"><div class="bar ${rp>=30?"ok":"base"}" style="grid-template-columns:1fr 38px"><div class="tr"><i style="width:${rp}%"></i></div><span>${rp}%</span></div><div class="th" style="left:30%"></div></div><div class="note" style="margin-top:6px">Needs 30% or more (line) for the comparison to count.</div></div>
+        <div class="metric"><h6>Target scripts that failed</h6><div class="bars">${bar("Current",S.baseline.failed,S.baseline.n,"base")}${bar("Patched",S.patched.failed,S.patched.n,"pat")}</div></div>
+        <div class="metric"><h6>Ordinary buyers: Fatal calls</h6>${S.has_controls?`<div class="bars">${bar("Current",S.control_baseline.fatal,S.control_baseline.n,"base")}${bar("Patched",S.control_patched.fatal,S.control_patched.n,"pat")}</div>`:`<div class="note">No control runs yet.</div>`}</div></div>
+      <div class="note">Small counts: treat "improved" as evidence to take to a reviewer, not proof. Each run is graded by one question: did the bot do what a correct bot does for that script? Click a result to see why; a flag means the two checks disagreed.</div>`}
+    h+=`</div>`;
+  }
+  // step 4
+  const de=d.decision;
+  h+=`<div class="step"><h3><span class="sn ${de?"done":""}">${pf?4:2}</span>Decision</h3>`+
+   `<div class="tl"><span>Problem found <b>${esc(d.found_at)}</b></span>${pg.tested_at?`<span>Tested <b>${fdate(pg.tested_at)}</b></span><span>Found to tested <b>${pg.hours_found_to_tested} h</b></span>`:""}${de?`<span>Decided <b>${fdate(de.at)}</b></span>`:""}</div>`+
+   (de?`<div class="callout ${de.status==="approved"?"ok":""}"><b>${de.status==="approved"?"Approved":"Rejected"}</b> by ${esc(de.by)}${de.note?": "+esc(de.note):""}</div>`:"")+
+   `<div class="radios">${["approved","rejected"].map(v=>`<label><input type="radio" name="fxdec" value="${v}" ${de&&de.status===v?"checked":""}>${v==="approved"?"Approve (hand to the team)":"Reject"}</label>`).join("")}</div>
+    <div class="addrow" style="grid-template-columns:1fr 2fr auto"><input class="inp" id="fxwho" placeholder="Your name" value="${esc(de?de.by:(localStorage.getItem("reviewer")||""))}"><input class="inp" id="fxnote" placeholder="Reason (optional)" value="${esc(de?de.note:"")}"><button class="btn primary" id="fxdecide">${de?"Update":"Save decision"}</button></div>
+    <div class="note">Approving records a change request. It does not change the live bot; your team applies it and releases it carefully.</div></div>`;
+  h+=`</div></div></div>`;
+  m.innerHTML=h;
+  m.querySelectorAll("[data-fx]").forEach(b=>b.onclick=()=>{fxSel=b.dataset.fx;fxD=null;fxForm=null;fxMsg="";renderFixes(true)});
+  const q=id=>$(id);
+  if(q("#fxpatch"))q("#fxpatch").onclick=()=>fxApi("patch");
+  if(q("#fxpack"))q("#fxpack").onclick=()=>fxApi("pack",{product:q("#fxprod").value,options:q("#fxopts").value});
+  m.querySelectorAll("[data-run]").forEach(b=>b.onclick=()=>{fxForm=b.dataset.run;fxMsg="";renderFixes(true)});
+  m.querySelectorAll("[data-runcancel]").forEach(b=>b.onclick=()=>{fxForm=null;renderFixes(true)});
+  m.querySelectorAll("[data-runsave]").forEach(b=>b.onclick=()=>{const[arm,sid]=b.dataset.runsave.split(":");const who=q("#fxby").value;localStorage.setItem("reviewer",who);const text=q("#fxtext").value;fxApi("run",{arm,script:sid,text,by:who}).then(()=>{if(!fxMsg)fxForm=null;renderFixes(true)})});
+  if(q("#fxdecide"))q("#fxdecide").onclick=()=>{const st=document.querySelector('input[name="fxdec"]:checked');if(!st){fxMsg="Choose approve or reject.";renderFixes(true);return}localStorage.setItem("reviewer",q("#fxwho").value);fxApi("decision",{status:st.value,by:q("#fxwho").value,note:q("#fxnote").value})};
+}
+
+/* ---------- review queue (focus view) ---------- */
+let rvData=null,rvFilter="todo",rvIdx=0,rvDraft={},rvToast="",rvLive=-1;
+const REASONS=["Misheard audio","Rule doesn't apply","Audit too strict","Other"];
+const fmtT=t=>Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0");
+function rvLineAt(c,t){let k=-1;c.transcript.forEach((e,i)=>{if(e.s<=t+0.6)k=i});return k}
+function rvInit(c){
+  if(rvDraft[c.id])return rvDraft[c.id];
+  const rv=c.review,d={overall:(rv&&rv.overall)||c.overall,items:{},added:rv?JSON.parse(JSON.stringify(rv.added||[])):[],err:""};
+  c.items.forEach(it=>{const r=rv&&rv.items&&rv.items[it.i];d.items[it.i]={no:!!(r&&r.action==="not_a_problem"),reason:(r&&r.reason)||"",verdict:(r&&r.verdict)||null,
+    pattern:(r&&r.action==="reassign")?(r.pattern==null?-1:r.pattern):null}});
+  return rvDraft[c.id]=d}
+async function renderReview(keep){
+  const m=$("#main"),my=viewSeq;
+  if(!keep||!rvData){try{rvData=await api("/api/review/queue")}catch(e){if(my===viewSeq)m.innerHTML=`<div class="card">${esc(e.message)}</div>`;return}}
+  if(my!==viewSeq)return;
+  const all=rvData.calls,todo=all.filter(c=>c.needs_review),done=all.filter(c=>c.review),list=rvFilter==="todo"?todo:done;
+  if(rvIdx>=list.length)rvIdx=Math.max(0,list.length-1);
+  const c=list[rvIdx];
+  let h=`<div class="ov"><div class="rvhead"><div><p class="eyebrow">Review queue</p><h1 style="font-size:28px;max-width:none">Check what the audit found</h1></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="seg" role="group" aria-label="Filter"><button data-rvf="todo" class="${rvFilter==="todo"?"on":""}">To review (${todo.length})</button><button data-rvf="done" class="${rvFilter==="done"?"on":""}">Reviewed (${done.length})</button></div>
+    <input class="inp" id="rvwho" style="width:170px" placeholder="Reviewing as…" aria-label="Your name" value="${esc(localStorage.getItem("reviewer")||"")}"></div></div>`;
+  if(rvToast)h+=`<div class="toast" id="rvtoast">${esc(rvToast)}</div>`;
+  if(!c){h+=`<div class="card"><b>${rvFilter==="todo"?"Nothing is waiting for review.":"No reviewed calls yet."}</b><div class="muted">${rvFilter==="todo"?"New calls with problems or flags appear here automatically.":""}</div></div></div>`;m.innerHTML=h;rvToast="";wireTop();return}
+  h+=`<div class="rvbar"><span class="nav2"><button id="rvprev" ${rvIdx===0?"disabled":""} aria-label="Previous call">&lsaquo;</button>${rvIdx+1} of ${list.length}<button id="rvnext" ${rvIdx>=list.length-1?"disabled":""} aria-label="Next call">&rsaquo;</button></span>
+    <span class="nm2" title="${esc(c.filename)}">${esc(c.filename)}</span><span class="sm muted">Audit says</span>${pill(c.overall)}
+    ${c.flags.length?`<details style="font-size:13px"><summary style="cursor:pointer;color:var(--nf);font-weight:600">&#9873; Why it was flagged (${c.flags.length})</summary><ul class="rvflags" style="margin:6px 0 0">${c.flags.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></details>`:""}</div>
+   <div class="rvwrap"><div class="rvleft" id="rvleft"></div><div class="rvright" id="rvright"></div></div></div>`;
+  m.innerHTML=h;rvToast="";wireTop();
+  // left: player + transcript with the audit's evidence highlighted
+  const d=rvInit(c),hl={};c.items.forEach((it,n)=>{if(it.t!=null){const k=rvLineAt(c,it.t);if(k>=0)(hl[k]=hl[k]||[]).push([n+1,it.verdict])}});
+  let L="";
+  if(c.audio)L+=`<audio id="rvaudio" controls preload="metadata" src="/api/audio/${c.id}/${esc(c.audio)}" style="width:100%"></audio>`;
+  else L+=`<div class="note">No audio for this call (it was a pasted transcript).</div>`;
+  if(c.recorded)L+=`<div class="recbox"><b>Bot recorded</b>${Object.entries(c.recorded).map(([k,v])=>`${esc(k)}: <b style="font:600 13px var(--body);text-transform:none;letter-spacing:0;color:var(--ink)">${esc(typeof v==="object"?JSON.stringify(v):v)}</b>`).join(" &nbsp;·&nbsp; ")}</div>`;
+  L+=`<div class="rvtx" id="rvtx">`+c.transcript.map((e,i)=>`<div class="tl ${e.bot?"bot":""} ${hl[i]?"hl":""} ${c.audio?"seek":""}" data-i="${i}" data-s="${e.s}" id="tl${i}"><span class="tt">${fmtT(e.s)}</span><span class="who">${e.bot?"Vani":"Buyer"}</span><span>${esc(e.x)}</span><span class="marks">${(hl[i]||[]).map(([n,v])=>`<span class="mk ${v==="Fatal"?"":"nf"}" title="Problem ${n}">${n}</span>`).join("")}</span></div>`).join("")+`</div>`;
+  $("#rvleft").innerHTML=L;
+  const au=$("#rvaudio"),tx=$("#rvtx");
+  const play=t=>{if(!au)return;const go=()=>{au.currentTime=Math.max(0,t-1.5);au.play().catch(()=>{})};if(au.readyState>=1)go();else{au.addEventListener("loadedmetadata",go,{once:true});au.load()}};
+  tx.querySelectorAll(".tl.seek").forEach(el=>el.onclick=()=>play(+el.dataset.s));
+  if(au)au.addEventListener("timeupdate",()=>{const k=rvLineAt(c,au.currentTime);if(k!==rvLive){rvLive=k;tx.querySelectorAll(".tl.live").forEach(x=>x.classList.remove("live"));const el=$("#tl"+k);if(el){el.classList.add("live");if(!au.paused)tx.scrollTo({top:el.offsetTop-tx.clientHeight/2+el.clientHeight/2,behavior:"smooth"})}}});
+  // first highlighted line into view
+  const first=Object.keys(hl)[0];if(first!==undefined){const el=$("#tl"+first);tx.scrollTop=el.offsetTop-tx.clientHeight/2+el.clientHeight/2}
+  // right: decisions
+  const paintRight=()=>{
+    let R=`<h3>What the audit found</h3>`;
+    if(!c.items.length)R+=`<div class="note">The audit found no problems in this call. Check the final verdict below.</div>`;
+    c.items.forEach((it,n)=>{const di=d.items[it.i],sev=di.verdict||(it.verdict==="Observation"?"Non-Fatal":it.verdict);
+      R+=`<div class="pc ${di.no?"no":""}"><div class="pch"><span class="mk ${sev==="Fatal"?"":"nf"}">${n+1}</span><b>${esc(it.parameter)}</b>${it.verdict!=="Observation"?pill(sev):pill("NA","Note")}${it.t!=null&&c.audio?`<button class="hear" data-hear="${it.t}">&#9654; Hear it</button>`:""}</div>
+        <div class="pcw">${esc((it.root_cause||it.reason||"").slice(0,170))}</div>${it.evidence?`<div class="pce">${esc(it.evidence.slice(0,130))}</div>`:""}
+        <div class="seg2"><button class="${!di.no?"on yes":""}" data-yes="${it.i}">Real problem</button><button class="${di.no?"on no":""}" data-no="${it.i}">Not a problem</button></div>
+        ${di.no?`<div class="rchips">${REASONS.map(r=>`<button class="${di.reason===r?"on":""}" data-rs="${it.i}|${esc(r)}">${esc(r)}</button>`).join("")}</div>${d.err&&!di.reason?`<div class="sm" style="color:var(--fatal)">Pick a reason.</div>`:""}`:""}
+        <details><summary>Change severity or pattern</summary><div class="moreb"><div class="seg2"><button class="${sev==="Fatal"?"on yes":""}" data-sev="${it.i}|Fatal">Fatal</button><button class="${sev==="Non-Fatal"?"on no":""}" data-sev="${it.i}|Non-Fatal">Non-fatal</button></div>
+          <select class="sel" data-pat="${it.i}" aria-label="Pattern"><option value="keep">Pattern: ${it.pattern!=null&&rvData.patterns[it.pattern]?esc(rvData.patterns[it.pattern].title):"none matched"} (keep)</option>${rvData.patterns.map((p,k)=>`<option value="${k}" ${di.pattern===k?"selected":""}>${esc(p.title)}</option>`).join("")}<option value="-1" ${di.pattern===-1?"selected":""}>None of these (a new pattern)</option></select></div></details></div>`});
+    R+=`<details class="pc"><summary style="color:var(--brand);font-weight:600">+ Add a problem the audit missed${d.added.length?` (${d.added.length})`:""}</summary><div class="moreb">${d.added.map((x,i)=>`<div class="addedl"><span>${esc(x.parameter)} ${pill(x.verdict)}${x.note?" · "+esc(x.note):""}</span><button class="btn tiny" data-rm="${i}">Remove</button></div>`).join("")}
+      <select class="sel" id="ap" aria-label="Rubric item">${rvData.params.map(p=>`<option>${esc(p)}</option>`).join("")}</select><select class="sel" id="av" aria-label="Severity"><option>Fatal</option><option>Non-Fatal</option></select><input class="inp" id="an" placeholder="What happened (optional)" aria-label="Note"><button class="btn" id="aadd">Add</button></div></details>
+      <h3>Final verdict for this call</h3><div class="radios">${["Fatal","Non-Fatal","Pass"].map(v=>`<label><input type="radio" name="rvov" value="${v}" ${v===d.overall?"checked":""}>${v}${v===c.overall?` <span class="muted sm">(audit)</span>`:""}</label>`).join("")}</div>
+      <div class="rvsave"><button class="btn primary" id="rvsave">${c.review?"Update review":"Save and next"}</button><span class="sm" id="rvmsg" style="color:var(--fatal)">${esc(d.msg||"")}</span></div>`;
+    $("#rvright").innerHTML=R;
+    const re=()=>paintRight();
+    document.querySelectorAll("[data-hear]").forEach(b=>b.onclick=()=>play(+b.dataset.hear));
+    document.querySelectorAll("[data-yes]").forEach(b=>b.onclick=()=>{d.items[b.dataset.yes].no=false;d.items[b.dataset.yes].reason="";re()});
+    document.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>{d.items[b.dataset.no].no=true;re()});
+    document.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>{const[i,r]=b.dataset.rs.split("|");d.items[i].reason=r;re()});
+    document.querySelectorAll("[data-sev]").forEach(b=>b.onclick=()=>{const[i,v]=b.dataset.sev.split("|");const it=c.items.find(x=>String(x.i)===i);d.items[i].verdict=v===it.verdict?null:v;re()});
+    document.querySelectorAll("[data-pat]").forEach(sel=>sel.onchange=()=>{d.items[sel.dataset.pat].pattern=sel.value==="keep"?null:+sel.value});
+    document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{d.added.splice(+b.dataset.rm,1);re()});
+    const ad=$("#aadd");if(ad)ad.onclick=()=>{d.added.push({parameter:$("#ap").value,verdict:$("#av").value,pattern:-1,note:$("#an").value.trim()});re()};
+    document.querySelectorAll('input[name="rvov"]').forEach(r=>r.onchange=()=>{d.overall=r.value});
+    $("#rvsave").onclick=async()=>{
+      const who=$("#rvwho").value.trim();
+      if(!who){d.msg="Add your name at the top first.";re();return}
+      const bad=c.items.find(it=>d.items[it.i].no&&!d.items[it.i].reason);if(bad){d.err=true;d.msg="Pick a reason for each problem you marked as not a problem.";re();return}
+      const items={};c.items.forEach(it=>{const x=d.items[it.i];items[it.i]={action:x.no?"not_a_problem":(x.pattern!==null?"reassign":"confirm"),pattern:x.pattern,reason:x.no?x.reason:"",verdict:x.verdict}});
+      localStorage.setItem("reviewer",who);$("#rvsave").disabled=true;
+      try{await api("/api/review/"+c.id,{method:"POST",body:JSON.stringify({reviewer:who,overall:d.overall,items,added:d.added})});delete rvDraft[c.id];rvToast="Saved. Here is the next call.";rvData=null;renderReview()}
+      catch(e){d.msg=e.message;re()}};
+  };
+  paintRight();
+  function wireTop(){
+    m.querySelectorAll("[data-rvf]").forEach(b=>b.onclick=()=>{rvFilter=b.dataset.rvf;rvIdx=0;renderReview(true)});
+    const w=$("#rvwho");if(w)w.onchange=()=>localStorage.setItem("reviewer",w.value.trim());
+    const pv=$("#rvprev"),nx=$("#rvnext");if(pv)pv.onclick=()=>{rvIdx--;rvLive=-1;renderReview(true)};if(nx)nx.onclick=()=>{rvIdx++;rvLive=-1;renderReview(true)};
+  }
+}
+
+/* ---------- overview ---------- */
+let insCache={},insSrc='manual',batchSum=null,f30=null,agr=null,regroupWas='idle';
+const LAYER={prompt:"The bot's instructions",speech_recognition:"Speech recognition",flow_logic:"Conversation flow and system rules",language_config:"Language settings",option_lists:"Product option lists",unclear:"Cause unknown"};
+const FIXT={prompt_patch:"Prompt change",config_change:"Product or settings change",speech_recognition_check:"Speech-recognition check",option_list_update:"Option list update"};
+const isOne=c=>c.key==="oneoff"||/^one-off/i.test(c.title)||c.key==="silence";
+const SW=["var(--c1)","var(--c2)","var(--c3)","var(--c4)","var(--c5)","var(--c6)","var(--muted)","var(--muted)","var(--muted)"];
+function tip(e,html){const t=$("#tip");t.innerHTML=html;t.style.opacity=1;const r=12;t.style.left=Math.min(innerWidth-270,e.clientX+r)+"px";t.style.top=(e.clientY+r)+"px"}
+function untip(){$("#tip").style.opacity=0}
+
+
+function chipsFor(items){
+  const g=new Map();items.forEach(it=>{const k=it.pattern==null?"none":it.pattern;const e=g.get(k)||{n:0,it};e.n++;g.set(k,e)});
+  const P=insCache.manual.clusters;
+  return [...g.entries()].map(([k,{n,it}])=>{const pt=k==="none"?null:P[k];
+    return `<span class="chip2" title="${esc(it.root_cause)}"><i style="background:${pt?(SW[k]||SW[6]):"transparent;border:1px solid var(--muted)"}"></i>${esc(pt?pt.title:"No pattern fits")}${n>1?` &times;${n}`:""}</span>`}).join("")
+}
+
+async function renderOverview(){
+  const m=$("#main"),my=viewSeq;insSrc="manual";
+  try{if(!insCache[insSrc])insCache[insSrc]=await api("/api/insights?source="+insSrc)}catch(e){m.innerHTML=`<div class="card"><h3>No findings yet</h3><div class="muted">Run the grouping step to create the findings file.</div></div>`;return}
+  const insData=insCache[insSrc]||insCache.manual;
+  if(!batchSum){try{batchSum=(await api("/api/batch")).summary}catch(e){batchSum={}}}
+  if(!f30){try{f30=await api("/api/failed30")}catch(e){f30={}}}
+  if(!agr){try{agr=await api("/api/agreement")}catch(e){agr=null}}
+  if(!insCache.manual){try{insCache.manual=await api("/api/insights?source=manual")}catch(e){}}
+  let L={calls:0,recent:[],by_pattern:{},pending:0,matched:0,unmatched:0,problems:0,with_problems:0};try{L=await api("/api/live")}catch(e){}
+  let RG={status:"idle"};try{RG=await api("/api/regroup")}catch(e){}
+  let RS={};try{RS=await api("/api/review/stats")}catch(e){}
+  if(insCache.live===undefined){try{insCache.live=await api("/api/insights?source=live")}catch(e){insCache.live=null}}
+  regroupWas=RG.status;
+  if(my!==viewSeq)return;
+  const d=insData,TC=d.calls+L.calls,TP=d.issues+L.problems,HR=d.calls+(L.reviewed_calls||0);
+  const cl=d.clusters.map((c,i)=>{const lv=L.by_pattern[i]||{issues:0,calls:0,fatal:0,confirmed:0};return {...c,idx:i,calls:c.calls+lv.calls,issues:c.issues+lv.issues,fatal:c.fatal+lv.fatal,newIssues:lv.issues,newConfirmed:lv.confirmed}});
+  cl.sort((a,b)=>(isOne(a)-isOne(b))||((b.fatal*3+(b.issues-b.fatal))-(a.fatal*3+(a.issues-a.fatal)))||(b.calls-a.calls));
+  cl.forEach((c,i)=>c.rank=i+1);
+  const named=cl.filter(c=>!isOne(c)),top=cl[0],nFix=cl.filter(c=>c.fix).length,namedIssues=named.reduce((a,c)=>a+c.issues,0),cover=TP?Math.round(100*namedIssues/TP):0;
+  const sig=JSON.stringify([d.generated_at,ui.open,ui.chartTable,insSrc,L.calls,L.problems,L.matched,L.pending,RG.status,RG.message,!!insCache.live,RS.reviewed_calls,L.to_review]);if(sig===ui.lastov)return;ui.lastov=sig;
+  let h=`<div class="ov">
+   <header><p class="eyebrow">Overview &middot; ${agr?agr.calls:d.calls} human-judged calls &middot; ${L.calls} audited automatically</p>
+    <h1>Why calls fail, and what to fix first</h1>
+    <p class="lede">Human reviewers have already judged <b>${agr?agr.calls:d.calls} calls</b> in your audit file. ${d.calls} of them were failures, and the patterns below were learned from those${agr&&agr.parts&&agr.parts.mixed?`; the other ${agr.parts.mixed} are a mix of Pass and Fail, used only to measure the automatic audit`:""}. ${L.calls?`${L.calls} more call${L.calls>1?"s have":" has"} been audited automatically here, and a person has reviewed ${L.reviewed_calls||0} of them. `:"No calls have been audited automatically yet. "}Together they hold <b>${TP} problems</b>, and ${namedIssues} of them fall into <b>${named.length} repeating patterns</b>${TP-namedIssues?` (${TP-namedIssues} are one-offs or fit no pattern yet)`:""}. The costliest is <b>&ldquo;${esc(top.title)}&rdquo;</b>: ${top.calls} calls, ${top.fatal} of its ${top.issues} problems fatal.</p>
+    <p class="provenance">Patterns come from the auditors' notes. New calls are matched to them automatically and count as unconfirmed until a person reviews them. Totals update as calls finish.</p></header>
+
+   <ol class="flow" aria-label="Progress of this analysis">
+     <li class="done"><span class="st"><i class="dot"></i>Done</span><b>1 &middot; Judge</b><span class="d">${agr?agr.calls:d.calls} calls judged by human reviewers (${d.calls} used for patterns${agr&&agr.parts&&agr.parts.mixed?`, ${agr.parts.mixed} for measuring`:""})${L.calls?`; ${L.calls} audited automatically, ${L.reviewed_calls||0} reviewed`:"; none audited automatically yet"}</span></li>
+     <li class="done"><span class="st"><i class="dot"></i>Done</span><b>2 &middot; Group</b><span class="d">${named.length} patterns cover ${cover}% of ${TP} problems</span></li>
+     <li class="done"><span class="st"><i class="dot"></i>Needs review</span><b>3 &middot; Fix</b><span class="d">${nFix} fixes proposed, not yet approved</span></li>
+     <li class="todo"><span class="st"><i class="dot"></i>Not started</span><b>4 &middot; Test</b><span class="d">0 fixes tested on the real prompt</span></li>
+   </ol>
+
+
+   <section class="livebar"><div class="sect-head"><h2>Calls audited automatically</h2><p>Each new call is audited as it arrives. These results are unconfirmed until a person reviews them; the audit currently catches about half of Fatal calls.</p></div>
+    <div class="liverow"><div><b>${L.calls}</b><span>audited automatically</span></div><div><b>${L.with_problems}</b><span>with problems found</span></div>
+      <div><b>${L.matched}</b><span>problems matched to a pattern</span></div><div><b>${L.unmatched}</b><span>fit no pattern (possible new one)</span></div>
+      <div class="act"><span>${L.pending?`Matching ${L.pending} call${L.pending>1?"s":""}…`:"Up to date"}${L.incomplete?` &middot; <b>${L.incomplete} audit${L.incomplete>1?"s":""} incomplete</b>`:""}</span><span><a class="linkbtn" href="#review">${L.to_review?L.to_review+" waiting for review":"Open review queue"}</a> &middot; ${L.reviewed_calls||0} of ${L.calls} reviewed</span></div></div>
+    ${L.recent.length?`<div class="rcalls">`+L.recent.map(r=>`<a class="rcall" href="#${r.id}"><span class="fn" title="${esc(r.filename)}">${esc(r.filename)}</span>${pill(r.overall)}<span class="chips2">`+(r.items.length?chipsFor(r.items):(r.assigned?`<span class="muted sm">No problems found</span>`:`<span class="muted sm">Matching…</span>`))+`</span></a>`).join("")+`</div>`:`<div class="note"><details class="guide" data-key="feed" open><summary>Connect your call feed</summary><div style="padding:2px 18px 18px;font-size:13.5px;display:grid;gap:10px">
+      <p style="margin:0;color:var(--ink2)">No calls have arrived yet. Once a call source is connected, every finished call is audited automatically with nobody uploading anything. There are two ways to connect:</p>
+      <div><b>1. Webhook.</b> After each call, the call platform sends this request:<div class="change" style="margin-top:6px">POST ${location.origin}/api/ingest
+X-Ingest-Token: &lt;INGEST_TOKEN from the .env file&gt;
+{"call_id": "123", "audio_url": "https://…/call.mp3",
+ "recorded_values": {"quantity": "5", "unit": "kg", "specs": {"Capacity": "6 kg"}}}</div></div>
+      <div><b>2. Inbox folder.</b> Drop recordings into <code>data/inbox/</code>. An optional file with the same name and a <code>.json</code> ending can carry <code>call_id</code> and <code>recorded_values</code>. Files are picked up within about 10 seconds.</div>
+      <p style="margin:0" class="note"><b>Send the recorded values</b> (what the bot saved for quantity, unit and specs) whenever you can. The audit compares them with what the buyer said, which is how the human auditors catch errors such as "5 kg saved as 55 kg". Without them the audit only hears the call.</p></div></details></div>`}</section>
+   <details class="guide" data-key="guide" ${ui.open.guide===false?"":"open"}><summary>New here? Start with this</summary><div class="cols3">
+     <div><b>What this page is</b><p>Human auditors listened to phone calls between buyers and an AI voice bot and marked the ones that went wrong. We read their notes, found the problems that keep repeating, and ranked them so the team knows what to fix first.</p></div>
+     <div><b>How to read a pattern</b><p>Each card is one repeating problem. <em>Fatal</em> means the lead would reach a seller wrong or unusable. <em>Non-fatal</em> means it was a smaller slip. Open a card to see real examples and a suggested fix.</p></div>
+     <div><b>What is still missing</b><p>No fix has been tested on the real prompt yet, so treat each fix as a suggestion for a person to review. The reference calls were judged by humans; calls audited automatically stay unconfirmed until reviewed, and how well the automatic audit agrees with humans is shown further down.</p></div></div></details>
+
+   <section><div class="sect-head"><h2>The patterns, ranked</h2><p>Ranked by how severe and how common. A fatal problem counts three times a non-fatal one.</p></div><div class="pats">`;
+  cl.forEach((c,i)=>{
+    const key="pat:"+c.idx,col=SW[c.idx]||SW[6],f=c.fix;
+    h+=`<details class="pat" data-key="${key}" ${(ui.open[key]??(i===0))?"open":""}><summary>
+      <span class="rank">${c.rank}</span>
+      <span><span class="ptitle"><i class="sw" style="background:${col}"></i>${esc(c.title)}<span class="tag mute" style="font-weight:600">${{call:"Visible in the call",logs:"Needs the bot's saved values",mixed:"Partly visible in the call"}[c.evidence_type]||""}</span></span><p class="psum">${esc(c.plain_summary)}</p></span>
+      <span class="pstat"><span class="nums"><span><b>${c.calls}</b> ${c.calls===1?"call":"calls"}</span><span><b>${c.fatal}</b> fatal</span><span><b>${c.issues-c.fatal}</b> minor</span>${c.newIssues?`<span class="newchip">${c.newIssues} automatic${c.newConfirmed?` &middot; ${c.newConfirmed} confirmed`:""}</span>`:""}</span>
+        <span class="bar2" title="${c.calls} of ${TC} calls"><i style="width:${Math.round(c.calls/TC*100)}%;background:${col}"></i></span>
+        <span>Fix lives in: <b>${esc(LAYER[c.layer]||c.layer)}</b></span></span></summary>
+      <div class="pbody2"><div><h4>Real examples from the auditors' notes</h4><div class="ex">`+c.examples.map(x=>`<div class="e"><div class="meta">call ${esc(x.offer)}<br>${esc(x.parameter)}<br>${esc(x.verdict)}</div><div>Buyer: ${esc(x.trigger)}<br>Bot: ${esc(x.bot_error)}${x.quote?`<q>${esc(x.quote)}</q>`:""}</div></div>`).join("")+`</div></div>`+
+      (f?`<div class="fixbox"><div class="fixfoot"><h4 style="margin:0">Suggested fix</h4><span class="tag">${esc(FIXT[f.fix_type]||f.fix_type)}</span></div>
+        <div class="change" id="chg${c.idx}">${esc(f.change)}</div>
+        <dl class="kv2"><dt>Where it goes</dt><dd>${esc(f.where)}</dd><dt>Already in the prompt?</dt><dd><div class="callout ${/^no existing/i.test(f.already_covered)?"ok":""}">${esc(f.already_covered)}</div></dd><dt>What could go wrong</dt><dd>${esc(f.risk)}</dd><dt>How to test it</dt><dd>${esc(f.test_buyer)}</dd></dl>
+        <div class="fixfoot"><span class="tag warn">Not tested yet</span><button class="btn" data-copychg="${c.idx}">Copy text</button></div></div>`:`<div class="note">No fix proposed yet for this pattern.</div>`)+`</div></details>`});
+  h+=`</div></section>`;
+
+  const tp={};Object.entries(d.by_parameter).forEach(([k,v])=>tp[k]={Fatal:v.Fatal,"Non-Fatal":v["Non-Fatal"]});Object.entries(L.by_parameter||{}).forEach(([k,v])=>{const t=tp[k]||(tp[k]={Fatal:0,"Non-Fatal":0});t.Fatal+=v.Fatal;t["Non-Fatal"]+=v["Non-Fatal"]});
+  const bp=Object.entries(tp).sort((a,b)=>(b[1].Fatal*3+b[1]["Non-Fatal"])-(a[1].Fatal*3+a[1]["Non-Fatal"])),maxP=Math.max(...bp.map(([,v])=>v.Fatal+v["Non-Fatal"]));
+  h+=`<section><div class="sect-head"><h2>Where the failures fall</h2><p>The same ${TP} problems, counted by rubric item.</p>
+      <button class="btn tiny" id="ctoggle">${ui.chartTable?"Show chart":"Show as table"}</button></div><div class="chart">`;
+  if(ui.chartTable){h+=`<div style="overflow-x:auto"><table class="tbl"><tr><th>Rubric item</th><th>Fatal</th><th>Non-fatal</th><th>Total</th></tr>${bp.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.Fatal}</td><td>${v["Non-Fatal"]}</td><td>${v.Fatal+v["Non-Fatal"]}</td></tr>`).join("")}</table></div>`}
+  else{h+=`<div class="legend"><span><i style="background:var(--fatal)"></i>Fatal</span><span><i style="background:var(--nf)"></i>Non-fatal</span></div>`+
+    bp.map(([k,v])=>{const t=v.Fatal+v["Non-Fatal"];return `<div class="crow" data-tip="<b>${esc(k)}</b><br>${v.Fatal} fatal, ${v["Non-Fatal"]} non-fatal"><span>${esc(k)}</span><span class="trk">${v.Fatal?`<i style="width:${v.Fatal/maxP*100}%;background:var(--fatal)"></i>`:""}${v["Non-Fatal"]?`<i style="width:${v["Non-Fatal"]/maxP*100}%;background:var(--nf)"></i>`:""}</span><span class="tot">${t}</span></div>`}).join("")}
+  h+=`</div></section>`;
+
+  h+=`<section><div class="sect-head"><h2>Does the automatic audit agree with humans?</h2><p>Checked on the ${agr?agr.calls:0} calls that have both a human verdict and an automatic one (${agr&&agr.parts.failed||0} that humans marked as failures, ${agr&&agr.parts.mixed||0} mixed). Small, so a first read.</p></div>`;
+  if(!agr)h+=`<div class="card muted">No comparison data yet.</div>`;
+  else{
+    const lab=["Fatal","Non-Fatal","Pass"],mx=(c,title)=>{const rows=Object.keys(c).filter(k=>lab.includes(k)).sort((a,b)=>lab.indexOf(a)-lab.indexOf(b));
+      return `<div><b class="sm">${title}</b><table class="mx" style="margin-top:6px"><tr><th>human \\ agent</th>${lab.map(l=>`<th>${l}</th>`).join("")}</tr>${rows.map(r=>`<tr><th>${r}</th>${lab.map(l=>{const n=c[r][l]||0;return `<td class="${!n?"z":r===l?"hit":"bad"}">${n}</td>`}).join("")}</tr>`).join("")}</table></div>`};
+    const dp=agr.disagreements_by_parameter,mxd=Math.max(1,...Object.values(dp).map(v=>v.length));
+    h+=`<div class="liverow" style="grid-template-columns:repeat(4,1fr)"><div><b>${agr.fatal_caught_pct}%</b><span>of Fatal calls caught (${agr.fatal_caught} of ${agr.fatal_calls})</span></div><div><b>${agr.failures_caught_pct}%</b><span>of individual failures caught (${agr.failures_caught} of ${agr.human_failures})</span></div><div><b>${agr.extra_failures}</b><span>failures it raised that humans did not</span></div><div style="border-right:0"><b>${agr.overall_exact}</b><span>overall verdicts match</span></div></div>
+     <div class="card" style="margin-top:12px"><h3>Overall verdict: human vs automatic</h3><div class="cols">${mx(agr.confusion_overall,"Against the human Overall Quality")}${mx(agr.confusion_call,"Against the human Call Quality (conversation only)")}</div>
+       <div class="note" style="margin-top:8px">Green is agreement; red is disagreement. Measured with one judge run per call and the stricter evidence rules (no claiming what the bot saved unless it was supplied). No recorded values were available for these calls.</div></div>
+     <div class="card" style="margin-top:12px"><h3>Where the automatic audit and the humans disagree</h3>`+Object.entries(dp).map(([k,v])=>`<div class="bar" style="grid-template-columns:200px 1fr 34px;margin-bottom:6px"><span>${esc(k)}</span><div class="tr"><i style="width:${v.length/mxd*100}%;background:var(--brand)"></i></div><span>${v.length}</span></div>`).join("")+`<div class="note">Each disagreement is human to automatic. "Pass to Fatal" means the human passed it and the audit called it Fatal.</div></div>
+     ${agr.saved_values_test?(()=>{const t=agr.saved_values_test;return `<div class="card" style="margin-top:12px"><h3>If the audit is given the bot's saved values</h3>
+       <div class="liverow" style="grid-template-columns:repeat(2,1fr)"><div><b>${t.flagged_item} of ${t.testable}</b><span>lead-data errors flagged (${t.calls-t.testable} more not testable)</span></div><div style="border-right:0"><b>Upper bound</b><span>saved values come from human remarks, not real logs</span></div></div>
+       <div style="overflow-x:auto"><table class="tbl" style="margin-top:8px"><tr><th>Call</th><th>Saved value given</th><th>Human marked</th><th>Audit says</th></tr>`+t.rows.map(r=>r.testable?`<tr><td>${esc(r.offer)}</td><td>${esc(Object.entries(r.recorded).map(([k,v])=>k+": "+v).join("; ").slice(0,140))}</td><td>${esc(Object.entries(r.human).map(([k,v])=>k+" "+v).join(", "))}</td><td class="${r.hit?"hit":"bad"}">${esc(Object.entries(r.audit).map(([k,v])=>k+" "+v).join(", "))}</td></tr>`:`<tr><td>${esc(r.offer)}</td><td colspan="3" class="muted">Not testable: ${esc(r.why)}</td></tr>`).join("")+`</table></div>
+       <div class="note" style="margin-top:8px">These are the lead-data failures that cannot be seen in the audio. The saved value was copied from the human auditors' remarks, so this is an upper bound and does not change the headline figures above. Real logs are needed to measure it properly.</div></div>`})():""}
+     <div class="callout" style="margin-top:12px"><b>Why it misses failures.</b> ${esc(agr.why)}</div>`}
+  h+=`</section>
+   <section><div class="sect-head"><h2>Keeping it honest in production</h2><p>Accuracy is measured continuously from the calls people review, not from a one-off test.</p></div><div class="trust">
+    <div class="tbox"><h3>Human review so far</h3>${RS.reviewed_calls?`<div class="rowlist"><div><span>Calls reviewed</span><b>${RS.reviewed_calls}</b></div><div><span>Final verdict kept as the audit said</span><b>${RS.overall_kept_pct}%</b></div><div><span>Problems confirmed as real</span><b>${RS.problems_real_pct==null?"–":RS.problems_real_pct+"%"}</b></div><div><span>Pattern matches judged correct</span><b>${RS.match_accuracy_pct==null?"–":RS.match_accuracy_pct+"%"}</b></div><div><span>Problems the audit missed (added)</span><b>${RS.missed_problems_added}</b></div></div>`:`<p class="note" style="margin:0">No production call has been reviewed yet. Reviews made in the <a class="linkbtn" href="#review">review queue</a> show here as accuracy figures, and update as more calls are checked.</p>`}</div>
+    <div class="tbox"><h3>Are the patterns sensible?</h3><div class="big2">${cover}%<small>of problems sit in a named pattern</small></div>
+      <div class="rowlist"><div><span>Patterns</span><b>${d.quality.clusters}</b></div><div><span>Compared with a human's grouping</span><b>Not yet</b></div></div>
+      <p class="note" style="margin:0">The patterns were drawn from the auditors' notes. To measure quality, a person groups the same ${d.issues} reviewed problems by hand and we compare. <a class="linkbtn" href="/api/insights/sheet">Download the sheet</a></p></div></div>
+    ${d.vendor_note?`<p class="note" style="margin:12px 0 0">${esc(d.vendor_note)}</p>`:""}</section>`;
+
+  h+=`</div>`;
+  m.innerHTML=h;
+  m.querySelectorAll("details[data-key]").forEach(el=>el.addEventListener("toggle",()=>{ui.open[el.dataset.key]=el.open}));
+  m.querySelectorAll("[data-copychg]").forEach(btn=>btn.onclick=()=>{const t=insCache[insSrc].clusters[+btn.dataset.copychg].fix.change;const ok=()=>{btn.textContent="Copied";setTimeout(()=>btn.textContent="Copy text",1400)};
+    (navigator.clipboard?navigator.clipboard.writeText(t).then(ok,()=>{}):Promise.reject()).catch(()=>{const r=document.createRange();r.selectNode($("#chg"+btn.dataset.copychg));getSelection().removeAllRanges();getSelection().addRange(r)})});
+  const rb=$("#regroupbtn");if(rb)rb.onclick=async()=>{rb.disabled=true;try{await api("/api/regroup/start",{method:"POST",body:"{}"})}catch(e){}ui.lastov="";renderOverview()};
+  m.querySelectorAll("[data-src]").forEach(b=>b.onclick=()=>{insSrc=b.dataset.src;ui.lastov="";renderOverview()});
+  const ct=$("#ctoggle");if(ct)ct.onclick=()=>{ui.chartTable=!ui.chartTable;ui.lastov="";renderOverview()};
+  m.querySelectorAll("[data-tip]").forEach(el=>{el.addEventListener("mousemove",e=>tip(e,el.dataset.tip));el.addEventListener("mouseleave",untip)});
+}
+
+loadSamples();poll();
+</script>
+</body>
+</html>
