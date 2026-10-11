@@ -1,0 +1,6 @@
+.env
+data/
+cache/
+out/
+__pycache__/
+.pylibs/

@@ -1,0 +1,21 @@
+{
+ "id": "f-handover",
+ "patch": {
+  "built_at": 1791648638,
+  "anchor_line": 36,
+  "inserted": "Say the transfer line once and finish the whole sentence before connecting. If the transfer does not happen or the seller does not pick up, say so once and close politely. Never restart the call flow. Listen for the buyer's reply before transferring.",
+  "chars_before": 158206,
+  "chars_after": 158457,
+  "before": [
+   "Before selecting a question, exclude fields already collected, confirmed, validly inferred, deferred, not applicable, or exhausted. A blank value alone does not",
+   "After the final permitted ask receives no valid resolution, set @call_step to LOOP_DETECTED and close that field as exhausted. Briefly defer the detail to the s"
+  ],
+  "after": [
+   "If product identification/requirement confirmation is exhausted, do not create a lead or advance to collection: set @buyer_disposition to 'BL Deleted', then @ca",
+   "If transfer consent is exhausted without agreement, do not transfer or mark silence/ambiguity as refusal. Set @buyer_disposition and then @call_outcome to 'BL E"
+  ]
+ },
+ "pack": null,
+ "runs": [],
+ "decision": null
+}

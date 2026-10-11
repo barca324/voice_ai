@@ -1,0 +1,604 @@
+{
+ "generated_at": "2026-10-10 16:36",
+ "generated_by": "Sarvam pipeline, regrouped with 32 problems from new calls (automatic, unconfirmed)",
+ "calls": 39,
+ "issues": 71,
+ "by_parameter": {
+  "Spec Missed Opportunity": {
+   "Fatal": 6,
+   "Non-Fatal": 4
+  },
+  "Quantity Accuracy": {
+   "Fatal": 6,
+   "Non-Fatal": 1
+  },
+  "Looping Behavior": {
+   "Fatal": 4,
+   "Non-Fatal": 4
+  },
+  "Outcome Accuracy": {
+   "Fatal": 5,
+   "Non-Fatal": 0
+  },
+  "Spec1 Accuracy": {
+   "Fatal": 4,
+   "Non-Fatal": 2
+  },
+  "Quantity Probing Error": {
+   "Fatal": 4,
+   "Non-Fatal": 1
+  },
+  "Quantity Unit Accuracy": {
+   "Fatal": 3,
+   "Non-Fatal": 1
+  },
+  "OnCall AstBuy Error": {
+   "Fatal": 2,
+   "Non-Fatal": 3
+  },
+  "Dead air": {
+   "Fatal": 2,
+   "Non-Fatal": 2
+  },
+  "WER": {
+   "Fatal": 1,
+   "Non-Fatal": 4
+  },
+  "Spec2 Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 1
+  },
+  "MCAT Search Error": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "Additional Observation": {
+   "Fatal": 0,
+   "Non-Fatal": 4
+  },
+  "Additional Details": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "Qty Missed Opportunity": {
+   "Fatal": 1,
+   "Non-Fatal": 0
+  }
+ },
+ "clusters": [
+  {
+   "title": "Bot records wrong quantity or unit",
+   "plain_summary": "The bot misinterprets the buyer's quantity or unit, leading to incorrect lead details. This hurts the lead because sellers get mismatched requirements, causing failed connections.",
+   "layer": "prompt",
+   "members": [
+    0,
+    4,
+    9,
+    10,
+    11,
+    40,
+    41,
+    49,
+    50,
+    52,
+    53,
+    58,
+    61,
+    64,
+    65,
+    68
+   ],
+   "issues": 16,
+   "calls": 10,
+   "fatal": 12,
+   "score": 40,
+   "parameters": [
+    "OnCall AstBuy Error",
+    "Quantity Accuracy",
+    "Quantity Probing Error",
+    "Quantity Unit Accuracy",
+    "Spec1 Accuracy",
+    "WER"
+   ],
+   "from_new_calls": 11,
+   "examples": [
+    {
+     "offer": "149775501595",
+     "parameter": "Quantity Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Said the number five twice (\"Panch Panch\"). | bot: Recorded it as 55 Kg instead of 5 Kg.",
+     "bot_error": "",
+     "quote": "Panch Panch"
+    },
+    {
+     "offer": "144976489875",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Asked for 100 cartons at least. | bot: Read back 400 cartons and a pack size the buyer never gave, though 100 was recorded.",
+     "bot_error": "",
+     "quote": "100 carton chahiye"
+    },
+    {
+     "offer": "145640522534",
+     "parameter": "Quantity Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Never gave a quantity. | bot: Recorded a quantity anyway.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "145640522534",
+     "parameter": "Quantity Unit Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Never gave a unit. | bot: Recorded a unit anyway.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 1,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "When a buyer explicitly states a custom unit (e.g., 'pair' / पेयर), preserve it exactly as spoken instead of mapping it to the default system unit (e.g., 'piece' / पीस). If the buyer never states a unit, do not invent one; leave it blank and proceed to seller connection.",
+    "where": "After [para 55] Assemble before you respond and before [para 148] Product-context inference",
+    "already_covered": "[para 55] Assemble before you respond and [para 58] Advance and capture silently cover capturing partial info and not re-asking, but lack explicit rules to preserve custom units and avoid hallucinating missing quantities/units.",
+    "risk": "May cause the bot to retain non-standard units like 'pair' which might confuse downstream filtering if the system strictly expects standard metric/imperial units.",
+    "test_buyer": "Buyer: 'I need 10 pairs of these shoes.' Bot should record 10 pairs, not 10 pieces. Buyer: 'I need 5.' Bot should record 5 with no unit instead of defaulting to 5 Kg."
+   }
+  },
+  {
+   "title": "Bot misclassifies product or spec",
+   "plain_summary": "The bot assigns the wrong product category or specification due to ASR errors or poor context. This hurts the lead because the wrong sellers are contacted.",
+   "layer": "flow_logic",
+   "members": [
+    1,
+    3,
+    23,
+    24,
+    25,
+    26,
+    46,
+    54,
+    55,
+    59,
+    62,
+    69
+   ],
+   "issues": 12,
+   "calls": 9,
+   "fatal": 10,
+   "score": 32,
+   "parameters": [
+    "MCAT Search Error",
+    "Outcome Accuracy",
+    "Spec Missed Opportunity",
+    "Spec1 Accuracy",
+    "Spec2 Accuracy",
+    "WER"
+   ],
+   "from_new_calls": 6,
+   "examples": [
+    {
+     "offer": "150467291263",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Named the brand \"Dubai Kunafa\". | bot: Recorded \"Dubai Kona\".",
+     "bot_error": "",
+     "quote": "Dubai Kunafa"
+    },
+    {
+     "offer": "150792907159",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Said \"hanji Sir ji\" (yes, sir). | bot: Replied as if the buyer had said to wait; the vendor transcript read \"hold on, hanji sir ji\".",
+     "bot_error": "",
+     "quote": "hanji Sir ji"
+    },
+    {
+     "offer": "146585804767",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Wanted a soil dumping service. | bot: Put the lead under Tipper Trucks and recorded the answer as \"10 wheeler\".",
+     "bot_error": "",
+     "quote": "Soil Dumping Service"
+    },
+    {
+     "offer": "146585804767",
+     "parameter": "MCAT Search Error",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Wanted a service with no matching product category. | bot: Mapped it to the nearest wrong category.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 2,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "After a language mismatch or mode switch, always resume the requirement collection flow by asking the first unanswered question from the current product's phase instead of staying stuck in language resolution.",
+    "where": "para 307 and para 1307",
+    "already_covered": "No existing rule found",
+    "risk": "This might cause the bot to prematurely skip collection if it misinterprets a brief language-related response as a refusal to provide specs, potentially reducing lead quality.",
+    "test_buyer": "Buyer says 'I need 540 kilos of sugar-free figs with no jaggery' and the bot switches to Hindi. After the language mismatch is resolved, the bot must immediately resume asking for missing quantity and color attributes instead of remaining in language resolution mode."
+   }
+  },
+  {
+   "title": "Bot misses buyer's specifications",
+   "plain_summary": "The bot fails to capture details the buyer explicitly states, such as size, color, or custom specs. This hurts the lead because the lead is incomplete for the seller.",
+   "layer": "prompt",
+   "members": [
+    5,
+    6,
+    7,
+    8,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    21,
+    56,
+    57,
+    63
+   ],
+   "issues": 14,
+   "calls": 12,
+   "fatal": 7,
+   "score": 28,
+   "parameters": [
+    "Additional Details",
+    "Looping Behavior",
+    "Qty Missed Opportunity",
+    "Quantity Unit Accuracy",
+    "Spec Missed Opportunity",
+    "Spec1 Accuracy",
+    "Spec2 Accuracy"
+   ],
+   "from_new_calls": 3,
+   "examples": [
+    {
+     "offer": "151583069359",
+     "parameter": "Spec2 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Said the use is a pharmacy college. | bot: Recorded \"hospital use\", the nearest listed option.",
+     "bot_error": "",
+     "quote": "Pharmacy college"
+    },
+    {
+     "offer": "150792907159",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Asked for a \"chote dhakkan wali\" (small-cap) one. | bot: Recorded \"1/2 inch\", which was not even in the option list.",
+     "bot_error": "",
+     "quote": "chote dhakkan wali"
+    },
+    {
+     "offer": "148254343495",
+     "parameter": "Quantity Unit Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Gave the quantity as 20 \"peti\" (cartons). | bot: Recorded the unit as \"pack\"; the auditor ruled peti is not a pack.",
+     "bot_error": "",
+     "quote": "maximum 20 peti"
+    },
+    {
+     "offer": "148367534695",
+     "parameter": "Spec2 Accuracy",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Said they want all grit sizes. | bot: Recorded a single size, 500.",
+     "bot_error": "",
+     "quote": "all grit sizes"
+    }
+   ],
+   "rank": 3,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "When the buyer gives multiple specs, context, or custom values in one breath, capture all of them immediately instead of picking only the nearest listed option. If the buyer provides a custom value that is unrelated or unclear, mark it as AMBIGUOUS and re-ask only that specific field; never overwrite a valid captured spec with an incorrect nearest option.",
+    "where": "para 149 (Context-aware extraction) and para 1068 (Capture future fields immediately)",
+    "already_covered": "para 149",
+    "risk": "The bot might capture more values than intended, potentially misattributing context to the wrong specification if surrounding context is ambiguous.",
+    "test_buyer": "A buyer says: 'I need a chote dhakkan wali, 20 peti, all grit sizes, G+1 building, 18 by 15 feet, for cylinder testing, six or twelve meter lifting height, and what are the brand options?'. The bot must capture all these specs and ask for the missing quantity, instead of recording only one size, one unit, or ignoring custom values."
+   }
+  },
+  {
+   "title": "Bot loops or repeats itself",
+   "plain_summary": "The bot gets stuck in a loop or repeats the same sentence multiple times instead of moving the conversation forward. This hurts the lead because it frustrates the buyer and wastes time.",
+   "layer": "prompt",
+   "members": [
+    27,
+    28,
+    29,
+    30,
+    31,
+    39,
+    43,
+    67
+   ],
+   "issues": 8,
+   "calls": 7,
+   "fatal": 3,
+   "score": 14,
+   "parameters": [
+    "Additional Observation",
+    "Looping Behavior",
+    "OnCall AstBuy Error"
+   ],
+   "from_new_calls": 3,
+   "examples": [
+    {
+     "offer": "145229504595",
+     "parameter": "Looping Behavior",
+     "verdict": "Fatal",
+     "trigger": "buyer: Waited to be transferred. | bot: Said the call would be transferred, then restarted the whole call flow, five times.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Waited to be transferred. | bot: Said it would transfer but never did; the record says Transferred, which is wrong.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "147866592359",
+     "parameter": "Looping Behavior",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Was being transferred. | bot: Said the whole transfer sentence twice in one go.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "151332292863",
+     "parameter": "Looping Behavior",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Was waiting on the line. | bot: Said \"good sellers are available on the line\" twice.",
+     "bot_error": "",
+     "quote": "abhi line par kafi achhe seller available hain"
+    }
+   ],
+   "rank": 4,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "After completing a required step or collecting a confirmed detail, always check if the buyer has already provided the next piece of information or signaled a topic change before asking again. If the objective is complete (e.g., meeting time agreed, price requested, or material type given), skip the redundant question and proceed to the next logical step or finalization.",
+    "where": "Insert this rule immediately after [para 49] Carry intent across the whole call; never restart a handled intent.",
+    "already_covered": "No existing rule found",
+    "risk": "This may cause the bot to prematurely skip necessary collection steps if the buyer's intent is ambiguous or if the system incorrectly interprets a vague statement as a complete signal.",
+    "test_buyer": "A simulated buyer asks 'What is the price for this?' multiple times. The bot must stop asking for the material type and transfer the call to a live seller to provide the price."
+   }
+  },
+  {
+   "title": "Bot approves leads without confirmation",
+   "plain_summary": "The bot approves leads even when the buyer did not confirm or explicitly rejected the requirement. This hurts the lead because it generates false sales leads.",
+   "layer": "flow_logic",
+   "members": [
+    12,
+    13,
+    48,
+    51
+   ],
+   "issues": 4,
+   "calls": 4,
+   "fatal": 4,
+   "score": 12,
+   "parameters": [
+    "Outcome Accuracy"
+   ],
+   "from_new_calls": 2,
+   "examples": [
+    {
+     "offer": "150913620652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Did not confirm the requirement. | bot: The lead was approved anyway.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "149551799652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "buyer: Answered \"No\" to the requirement, then hung up. | bot: The lead was approved anyway.",
+     "bot_error": "",
+     "quote": "No"
+    },
+    {
+     "offer": "real-Vani copy: replay of 144801537785 buyer",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The bot failed to recognize the buyer's initial 'हाँ जी मैडम' as a confirmation of intent, instead treating it as an incomplete utterance and asking for an estimate. This indicates the prompt lacks a clear instruction to interpret short, ambiguous Hindi affirmations as buyer intent confirmations.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "6CM70ZB74 (1).mp3",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The bot failed to confirm the product intent before asking for quantity, instead assuming the buyer wanted 'dry fruit ladoo' when they were calling for general dry fruits.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 5
+  },
+  {
+   "title": "Bot fails on dead air or cuts off",
+   "plain_summary": "The bot experiences long silences or cuts off the buyer mid-sentence, breaking the conversation. This hurts the lead because it loses the buyer's context.",
+   "layer": "speech_recognition",
+   "members": [
+    35,
+    36,
+    37,
+    38,
+    70
+   ],
+   "issues": 5,
+   "calls": 4,
+   "fatal": 2,
+   "score": 9,
+   "parameters": [
+    "Dead air",
+    "WER"
+   ],
+   "from_new_calls": 1,
+   "examples": [
+    {
+     "offer": "150855659463",
+     "parameter": "Dead air",
+     "verdict": "Fatal",
+     "trigger": "buyer: Waited on the line. | bot: A long silence on the call; the auditor gave no detail.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "151809921685",
+     "parameter": "Dead air",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Waited on the line. | bot: A silence on the call; the auditor gave no detail.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "Dead air",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Waited on the line. | bot: A silence on the call; the auditor gave no detail.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Not explained by the auditor. | bot: Not explained by the auditor.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 6
+  },
+  {
+   "title": "Bot fails to transfer to live sellers",
+   "plain_summary": "The bot incorrectly delays or refuses to transfer the call to a live seller when one is available. This hurts the lead because it blocks the sales opportunity.",
+   "layer": "prompt",
+   "members": [
+    32,
+    33,
+    34,
+    47
+   ],
+   "issues": 4,
+   "calls": 4,
+   "fatal": 1,
+   "score": 6,
+   "parameters": [
+    "OnCall AstBuy Error",
+    "WER"
+   ],
+   "from_new_calls": 1,
+   "examples": [
+    {
+     "offer": "151766288259",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Was being connected to a seller. | bot: Cut off the connect sentence after one word (\"mai\") and the call transferred.",
+     "bot_error": "",
+     "quote": "mai"
+    },
+    {
+     "offer": "151561342746",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Was trying to say something. | bot: Transferred to a live seller without hearing the buyer first.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "144976489875",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: A seller was available. | bot: Did not transfer the call; the record says Refused.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "441I2P874.mp3",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Fatal",
+     "trigger": "The bot failed to pitch the live connection properly and immediately moved to WhatsApp after the buyer declined, missing the opportunity to handle the live seller transfer as required.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 7
+  },
+  {
+   "title": "One-off issues",
+   "plain_summary": "Issues that did not fit another group.",
+   "layer": "unclear",
+   "members": [
+    2,
+    20,
+    22,
+    42,
+    44,
+    45,
+    60,
+    66
+   ],
+   "issues": 8,
+   "calls": 8,
+   "fatal": 3,
+   "score": 14,
+   "parameters": [
+    "Additional Details",
+    "Additional Observation",
+    "Quantity Probing Error",
+    "Spec Missed Opportunity",
+    "WER"
+   ],
+   "from_new_calls": 5,
+   "examples": [
+    {
+     "offer": "151774390467",
+     "parameter": "WER",
+     "verdict": "Fatal",
+     "trigger": "buyer: Asked for an \"electronic cable\". | bot: Heard \"Left Hand Cable\", which led to the wrong product category.",
+     "bot_error": "",
+     "quote": "electronic cable"
+    },
+    {
+     "offer": "149793460559",
+     "parameter": "Quantity Probing Error",
+     "verdict": "Fatal",
+     "trigger": "buyer: Was never asked for a quantity. | bot: Skipped the quantity question.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "149606162575",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Non-Fatal",
+     "trigger": "buyer: Could not follow the production-capacity question. | bot: Asked it so quickly that the buyer could not catch it; the buyer later hung up.",
+     "bot_error": "",
+     "quote": ""
+    },
+    {
+     "offer": "144828385995.mp3",
+     "parameter": "Additional Observation",
+     "verdict": "Observation",
+     "trigger": "The prompt instructs to interpret the latest reply in context and recognize a genuine product change, but it lacks a specific rule to handle abrupt topic shifts (e.g., from shoes to 'rocket' and 'rule') by initiating a fresh product identification flow.",
+     "bot_error": "",
+     "quote": ""
+    }
+   ],
+   "rank": 8
+  }
+ ],
+ "quality": {
+  "clusters": 7,
+  "issues_in_named_clusters": 63,
+  "coverage_pct": 89,
+  "human_grouping_done": false
+ },
+ "vendor_note": "Reviewed problems come from SquadStack's bot; new-call problems come from whatever was uploaded. The 'already covered' checks use Vani's own prompt."
+}

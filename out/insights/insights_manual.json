@@ -1,0 +1,1068 @@
+{
+ "generated_at": "2026-10-10 21:53",
+ "generated_by": "Grouped by Claude from the human auditors' remarks",
+ "calls": 30,
+ "issues": 39,
+ "fatal_calls": 18,
+ "nonfatal_calls": 12,
+ "by_parameter": {
+  "Spec Missed Opportunity": {
+   "Fatal": 3,
+   "Non-Fatal": 4
+  },
+  "Quantity Unit Accuracy": {
+   "Fatal": 3,
+   "Non-Fatal": 0
+  },
+  "Outcome Accuracy": {
+   "Fatal": 3,
+   "Non-Fatal": 0
+  },
+  "Spec1 Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 1
+  },
+  "WER": {
+   "Fatal": 1,
+   "Non-Fatal": 4
+  },
+  "Quantity Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 0
+  },
+  "Looping Behavior": {
+   "Fatal": 1,
+   "Non-Fatal": 3
+  },
+  "Dead air": {
+   "Fatal": 1,
+   "Non-Fatal": 2
+  },
+  "Spec2 Accuracy": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "MCAT Search Error": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "Qty Missed Opportunity": {
+   "Fatal": 1,
+   "Non-Fatal": 0
+  },
+  "Quantity Probing Error": {
+   "Fatal": 1,
+   "Non-Fatal": 0
+  },
+  "OnCall AstBuy Error": {
+   "Fatal": 0,
+   "Non-Fatal": 3
+  }
+ },
+ "clusters": [
+  {
+   "title": "Recorded value differs from what the buyer said",
+   "layer": "prompt",
+   "plain_summary": "The human auditors found, in the bot's saved values, something different from what the buyer said, for example 'peti' saved as 'pack'. This shows only in the bot's logs, not in the recording. The lead then reaches sellers with the wrong size, unit or quantity.",
+   "members": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "issues": 7,
+   "calls": 6,
+   "fatal": 5,
+   "score": 17,
+   "parameters": [
+    "Quantity Accuracy",
+    "Quantity Unit Accuracy",
+    "Spec1 Accuracy",
+    "Spec2 Accuracy"
+   ],
+   "examples": [
+    {
+     "offer": "151583069359",
+     "parameter": "Spec2 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Said the use is a pharmacy college.",
+     "bot_error": "Recorded \"hospital use\", the nearest listed option.",
+     "quote": "Pharmacy college"
+    },
+    {
+     "offer": "150792907159",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Non-Fatal",
+     "trigger": "Asked for a \"chote dhakkan wali\" (small-cap) one.",
+     "bot_error": "Recorded \"1/2 inch\", which was not even in the option list.",
+     "quote": "chote dhakkan wali"
+    },
+    {
+     "offer": "148254343495",
+     "parameter": "Quantity Unit Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Gave the quantity as 20 \"peti\" (cartons).",
+     "bot_error": "Recorded the unit as \"pack\"; the auditor ruled peti is not a pack.",
+     "quote": "maximum 20 peti"
+    },
+    {
+     "offer": "148367534695",
+     "parameter": "Spec2 Accuracy",
+     "verdict": "Non-Fatal",
+     "trigger": "Said they want all grit sizes.",
+     "bot_error": "Recorded a single size, 500.",
+     "quote": "all grit sizes"
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "Record the buyer's own words exactly when they differ from the listed options (\"peti\" stays \"peti\", \"all sizes\" stays \"all sizes\", \"pharmacy college\" stays as said). Never replace a value with the closest option. If it is unclear which option the buyer means, repeat their words back once and ask.",
+    "where": "Next to the existing custom-value rule (prompt line 652). Also reword line 977, \"Use the closest applicable unit naturally within the question\", so it only governs how the question is phrased, never what is recorded.",
+    "already_covered": "Yes, partly. Line 652 says \"Preserve custom values without forcing them into listed options\" and line 627 says \"Accept buyer-provided custom units\". Line 977 (\"use the closest applicable unit\") may pull the other way. So the bot may be ignoring a rule it already has.",
+    "risk": "Free-text values may not map to the downstream option lists, so someone must check how a custom value is stored.",
+    "test_buyer": "A buyer who asks for 20 peti of diapers, then says the use is a pharmacy college, then says all sizes. Check each is recorded as said."
+   },
+   "key": "value",
+   "evidence_type": "logs",
+   "rank": 1
+  },
+  {
+   "title": "Bot mishears what the buyer said",
+   "layer": "speech_recognition",
+   "plain_summary": "A number, brand or product name is heard wrongly, and the wrong word is saved. A wrong product name also sends the lead to the wrong category.",
+   "members": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "issues": 5,
+   "calls": 5,
+   "fatal": 3,
+   "score": 11,
+   "parameters": [
+    "Quantity Accuracy",
+    "Spec1 Accuracy",
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "149775501595",
+     "parameter": "Quantity Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Said the number five twice (\"Panch Panch\").",
+     "bot_error": "Recorded it as 55 Kg instead of 5 Kg.",
+     "quote": "Panch Panch"
+    },
+    {
+     "offer": "150467291263",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Named the brand \"Dubai Kunafa\".",
+     "bot_error": "Recorded \"Dubai Kona\".",
+     "quote": "Dubai Kunafa"
+    },
+    {
+     "offer": "151774390467",
+     "parameter": "WER",
+     "verdict": "Fatal",
+     "trigger": "Asked for an \"electronic cable\".",
+     "bot_error": "Heard \"Left Hand Cable\", which led to the wrong product category.",
+     "quote": "electronic cable"
+    },
+    {
+     "offer": "150792907159",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "Said \"hanji Sir ji\" (yes, sir).",
+     "bot_error": "Replied as if the buyer had said to wait; the vendor transcript read \"hold on, hanji sir ji\".",
+     "quote": "hanji Sir ji"
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "speech_recognition_check",
+    "change": "Add the misheard terms (Dubai Kunafa, electronic cable, hanji) to the agent's keyterms or pronunciations, and have the bot read back any quantity that looks implausible (for example 55 kg for a small order) once.",
+    "where": "Speech-recognition keyterms and pronunciations in the agent configuration; plus one exception to the no-reconfirm rule (prompt line 130).",
+    "already_covered": "No existing rule found for reading a doubtful number back. Line 130 says \"Do not repeat, paraphrase, summarize, or reconfirm the value\", which stops this check.",
+    "risk": "Extra confirmations add a turn and can annoy buyers if used on every value, so restrict it to implausible numbers.",
+    "test_buyer": "A buyer who says \"panch panch\" for five kilos in a noisy line. Check the bot records 5, or reads it back."
+   },
+   "key": "hear",
+   "evidence_type": "mixed",
+   "rank": 2
+  },
+  {
+   "title": "Seller hand-over is repeated, cut off or fails",
+   "layer": "flow_logic",
+   "plain_summary": "Around the moment the bot connects the buyer to a seller, it repeats lines, stops mid-sentence, transfers before listening, or says it will transfer and does not.",
+   "members": [
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "issues": 8,
+   "calls": 7,
+   "fatal": 1,
+   "score": 10,
+   "parameters": [
+    "Looping Behavior",
+    "OnCall AstBuy Error",
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "145229504595",
+     "parameter": "Looping Behavior",
+     "verdict": "Fatal",
+     "trigger": "Waited to be transferred.",
+     "bot_error": "Said the call would be transferred, then restarted the whole call flow, five times.",
+     "quote": ""
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Non-Fatal",
+     "trigger": "Waited to be transferred.",
+     "bot_error": "Said it would transfer but never did; the record says Transferred, which is wrong.",
+     "quote": ""
+    },
+    {
+     "offer": "147866592359",
+     "parameter": "Looping Behavior",
+     "verdict": "Non-Fatal",
+     "trigger": "Was being transferred.",
+     "bot_error": "Said the whole transfer sentence twice in one go.",
+     "quote": ""
+    },
+    {
+     "offer": "151332292863",
+     "parameter": "Looping Behavior",
+     "verdict": "Non-Fatal",
+     "trigger": "Was waiting on the line.",
+     "bot_error": "Said \"good sellers are available on the line\" twice.",
+     "quote": "abhi line par kafi achhe seller available hain"
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "Say the transfer line once and finish the whole sentence before connecting. If the transfer does not happen or the seller does not pick up, say so once and close politely. Never restart the call flow. Listen for the buyer's reply before transferring.",
+    "where": "In the finalisation and transfer section, next to the existing no-repeat rules (lines 184 and 359). The failed transfers also need an engineering check of the transfer tool.",
+    "already_covered": "Partly. Line 184 says \"Do not repeat a closing already delivered\" and line 359 says \"Do not repeatedly explain the routing process\", but nothing covers a transfer that fails or a sentence cut off mid-way.",
+    "risk": "Ending the call after one failed transfer could lose leads that a retry would have saved.",
+    "test_buyer": "A buyer who agrees to be connected while the transfer tool is made to fail. Check the bot says so once and closes."
+   },
+   "key": "handover",
+   "evidence_type": "call",
+   "rank": 3
+  },
+  {
+   "title": "Bot skips or rushes a required question",
+   "layer": "prompt",
+   "plain_summary": "The bot does not ask the quantity or a spec at all, or asks so fast the buyer cannot follow. The lead goes out missing details the seller needs.",
+   "members": [
+    19,
+    20,
+    21,
+    22
+   ],
+   "issues": 4,
+   "calls": 4,
+   "fatal": 3,
+   "score": 10,
+   "parameters": [
+    "Quantity Probing Error",
+    "Spec Missed Opportunity"
+   ],
+   "examples": [
+    {
+     "offer": "149815715067",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "Had to ask for the brand options.",
+     "bot_error": "Did not offer the brand options when asking the question.",
+     "quote": ""
+    },
+    {
+     "offer": "149793460559",
+     "parameter": "Quantity Probing Error",
+     "verdict": "Fatal",
+     "trigger": "Was never asked for a quantity.",
+     "bot_error": "Skipped the quantity question.",
+     "quote": ""
+    },
+    {
+     "offer": "145261422385",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "Had only one spec defined, pack size.",
+     "bot_error": "Did not probe the remaining spec.",
+     "quote": ""
+    },
+    {
+     "offer": "149606162575",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Non-Fatal",
+     "trigger": "Could not follow the production-capacity question.",
+     "bot_error": "Asked it so quickly that the buyer could not catch it; the buyer later hung up.",
+     "quote": ""
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "Ask the quantity once even when the buyer is slow or distracted. When offering spec options, name at most three, then wait for the answer.",
+    "where": "In the quantity and specification collection sections, next to line 898.",
+    "already_covered": "Possibly in conflict. Line 898 says to skip the repetition and move forward whenever information is missing, and that may make the bot skip required questions too eagerly.",
+    "risk": "Asking required questions more firmly could irritate buyers who are in a hurry; keep the limit of one extra ask.",
+    "test_buyer": "A buyer who answers every question with one word and takes long pauses. Check quantity is still asked once and options are not read in a rush."
+   },
+   "key": "skip",
+   "evidence_type": "call",
+   "rank": 4
+  },
+  {
+   "title": "Bot forces a wrong product category",
+   "layer": "flow_logic",
+   "plain_summary": "When the buyer's need does not fit a listed product, or the buyer changes product, the bot keeps the old or nearest category. The wrong sellers get the lead.",
+   "members": [
+    23,
+    24,
+    25,
+    26
+   ],
+   "issues": 4,
+   "calls": 3,
+   "fatal": 3,
+   "score": 10,
+   "parameters": [
+    "MCAT Search Error",
+    "Outcome Accuracy",
+    "Spec1 Accuracy"
+   ],
+   "examples": [
+    {
+     "offer": "146585804767",
+     "parameter": "Spec1 Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Wanted a soil dumping service.",
+     "bot_error": "Put the lead under Tipper Trucks and recorded the answer as \"10 wheeler\".",
+     "quote": "Soil Dumping Service"
+    },
+    {
+     "offer": "146585804767",
+     "parameter": "MCAT Search Error",
+     "verdict": "Non-Fatal",
+     "trigger": "Wanted a service with no matching product category.",
+     "bot_error": "Mapped it to the nearest wrong category.",
+     "quote": ""
+    },
+    {
+     "offer": "146339007375",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Changed to paper carry bags.",
+     "bot_error": "Could not switch product and left the lead under Handmade Gift, so the wrong seller was matched.",
+     "quote": "Paper Carry Bags"
+    },
+    {
+     "offer": "147866592359",
+     "parameter": "MCAT Search Error",
+     "verdict": "Fatal",
+     "trigger": "Asked for a syrup.",
+     "bot_error": "The lead went to the wrong product category.",
+     "quote": ""
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "config_change",
+    "change": "Decide what the bot should do when no product category fits or the buyer changes product: ask the buyer to confirm the new product, and do not create a lead under a category that does not match.",
+    "where": "Product-change handling and category mapping, which the product team owns.",
+    "already_covered": "The prompt has a product-change section, but the failures show the new category was not applied. Check whether the product-change tool call is made.",
+    "risk": "Declining a lead when nothing fits loses a lead that a human might have matched manually.",
+    "test_buyer": "A buyer who asks for a soil dumping service, then switches to paper carry bags."
+   },
+   "key": "category",
+   "evidence_type": "logs",
+   "rank": 5
+  },
+  {
+   "title": "Bot misses details the buyer gave in their own words",
+   "layer": "prompt",
+   "plain_summary": "The buyer volunteers a detail in free form, such as G+1 floors, one big bag, or 18 by 15. The bot does not record it or records only part of it.",
+   "members": [
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "issues": 5,
+   "calls": 5,
+   "fatal": 2,
+   "score": 9,
+   "parameters": [
+    "Qty Missed Opportunity",
+    "Spec Missed Opportunity"
+   ],
+   "examples": [
+    {
+     "offer": "151906312167",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "Said the building is G+1 (number of floors).",
+     "bot_error": "Did not capture the number of floors.",
+     "quote": "G+1"
+    },
+    {
+     "offer": "146501629646",
+     "parameter": "Qty Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "Said \"one big bag\" when asked how many kilos.",
+     "bot_error": "Did not capture the quantity.",
+     "quote": "one bag, one big bag"
+    },
+    {
+     "offer": "150795858885",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Non-Fatal",
+     "trigger": "Said the size is 18 by 15.",
+     "bot_error": "Recorded 18 ft as the width instead of length 18 ft and width 15 ft.",
+     "quote": "18/15, 15 ka chahiye"
+    },
+    {
+     "offer": "151045423163",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Non-Fatal",
+     "trigger": "Answered \"Cylinder testing\" to an open question about type.",
+     "bot_error": "Did not capture this custom answer.",
+     "quote": "Cylinder testing"
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "When the buyer gives a detail in their own words, record all of it as said: a two-part size such as 18 by 15 goes into its fields (length 18, width 15), two values such as six or twelve meter are both kept, and a quantity such as one big bag is recorded as said. Ask once only if the meaning is unclear.",
+    "where": "Next to the existing custom-value rule (prompt line 652) and the volunteered-answers rule (line 41).",
+    "already_covered": "Partly. Line 652 says to preserve custom values and line 41 says to accept volunteered answers, but nothing covers two-part values, answers with \"or\", or free-form quantities such as \"one big bag\".",
+    "risk": "Splitting a two-part value into the wrong fields could assign length and width the wrong way round, so the bot should keep the value as said when it is unsure.",
+    "test_buyer": "A buyer who says the size is 18 by 15, then says six meter or twelve meter, then asks for one big bag."
+   },
+   "key": "missed",
+   "evidence_type": "logs",
+   "rank": 6
+  },
+  {
+   "title": "Bot approves a lead the buyer did not confirm",
+   "layer": "flow_logic",
+   "plain_summary": "The buyer never confirms the requirement, or says no and hangs up, yet the lead is approved and sent to a seller.",
+   "members": [
+    12,
+    13
+   ],
+   "issues": 2,
+   "calls": 2,
+   "fatal": 2,
+   "score": 6,
+   "parameters": [
+    "Outcome Accuracy"
+   ],
+   "examples": [
+    {
+     "offer": "150913620652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Did not confirm the requirement.",
+     "bot_error": "The lead was approved anyway.",
+     "quote": ""
+    },
+    {
+     "offer": "149551799652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "Answered \"No\" to the requirement, then hung up.",
+     "bot_error": "The lead was approved anyway.",
+     "quote": "No"
+    }
+   ],
+   "detected_by_agent": null,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "If the buyer says no to the requirement, or ends the call before confirming it, do not create a lead. Set the buyer disposition to BL Deleted and the call outcome to No Product Requirement, then close politely. If a no could refer only to one question, ask once whether they still need the product.",
+    "where": "Next to the exhausted-confirmation rule (prompt line 37).",
+    "already_covered": "Partly. Line 37 covers a confirmation that is exhausted after repeated asks, but not an explicit \"No\" or a hang-up after the opening question.",
+    "risk": "A \"no\" to a single question could end a call that should continue, which is why the rule asks once when it is unclear.",
+    "test_buyer": "A buyer who answers \"No\" to the opening question and hangs up, and another who says no to one spec but still wants the product."
+   },
+   "key": "approve",
+   "evidence_type": "mixed",
+   "rank": 7
+  },
+  {
+   "title": "Long silences on the line",
+   "layer": "unclear",
+   "plain_summary": "The auditors marked dead air on these calls but did not say what caused it. Treat the cause as unknown until someone listens to them.",
+   "members": [
+    35,
+    36,
+    37
+   ],
+   "issues": 3,
+   "calls": 3,
+   "fatal": 1,
+   "score": 5,
+   "parameters": [
+    "Dead air"
+   ],
+   "examples": [
+    {
+     "offer": "150855659463",
+     "parameter": "Dead air",
+     "verdict": "Fatal",
+     "trigger": "Waited on the line.",
+     "bot_error": "A long silence on the call; the auditor gave no detail.",
+     "quote": ""
+    },
+    {
+     "offer": "151809921685",
+     "parameter": "Dead air",
+     "verdict": "Non-Fatal",
+     "trigger": "Waited on the line.",
+     "bot_error": "A silence on the call; the auditor gave no detail.",
+     "quote": ""
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "Dead air",
+     "verdict": "Non-Fatal",
+     "trigger": "Waited on the line.",
+     "bot_error": "A silence on the call; the auditor gave no detail.",
+     "quote": ""
+    }
+   ],
+   "detected_by_agent": null,
+   "key": "silence",
+   "evidence_type": "call",
+   "rank": 8
+  },
+  {
+   "title": "One-off issues",
+   "layer": "unclear",
+   "plain_summary": "Issues the auditor did not explain.",
+   "members": [
+    38
+   ],
+   "issues": 1,
+   "calls": 1,
+   "fatal": 0,
+   "score": 1,
+   "parameters": [
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "145229504595",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "Not explained by the auditor.",
+     "bot_error": "Not explained by the auditor.",
+     "quote": ""
+    }
+   ],
+   "detected_by_agent": null,
+   "key": "oneoff",
+   "evidence_type": "mixed",
+   "rank": 9
+  }
+ ],
+ "quality": {
+  "clusters": 7,
+  "issues_in_named_clusters": 35,
+  "coverage_pct": 90,
+  "agent_detected_pct": null,
+  "human_grouping_done": false
+ },
+ "vendor_note": "These 30 calls come from SquadStack's bot. The 'already covered' checks use Vani's own prompt, so they show what Vani already says, not what SquadStack's bot was told.",
+ "all_issues": [
+  {
+   "id": 0,
+   "offer": "149775501595",
+   "parameter": "Quantity Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said the number five twice (\"Panch Panch\").",
+   "bot_error": "Recorded it as 55 Kg instead of 5 Kg.",
+   "quote": "Panch Panch",
+   "layer": "speech_recognition",
+   "cluster": "hear"
+  },
+  {
+   "id": 1,
+   "offer": "150467291263",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Named the brand \"Dubai Kunafa\".",
+   "bot_error": "Recorded \"Dubai Kona\".",
+   "quote": "Dubai Kunafa",
+   "layer": "speech_recognition",
+   "cluster": "hear"
+  },
+  {
+   "id": 2,
+   "offer": "151774390467",
+   "parameter": "WER",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Asked for an \"electronic cable\".",
+   "bot_error": "Heard \"Left Hand Cable\", which led to the wrong product category.",
+   "quote": "electronic cable",
+   "layer": "speech_recognition",
+   "cluster": "hear"
+  },
+  {
+   "id": 3,
+   "offer": "150792907159",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said \"hanji Sir ji\" (yes, sir).",
+   "bot_error": "Replied as if the buyer had said to wait; the vendor transcript read \"hold on, hanji sir ji\".",
+   "quote": "hanji Sir ji",
+   "layer": "speech_recognition",
+   "cluster": "hear"
+  },
+  {
+   "id": 4,
+   "offer": "144976489875",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Asked for 100 cartons at least.",
+   "bot_error": "Read back 400 cartons and a pack size the buyer never gave, though 100 was recorded.",
+   "quote": "100 carton chahiye",
+   "layer": "speech_recognition",
+   "cluster": "hear"
+  },
+  {
+   "id": 5,
+   "offer": "151583069359",
+   "parameter": "Spec2 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said the use is a pharmacy college.",
+   "bot_error": "Recorded \"hospital use\", the nearest listed option.",
+   "quote": "Pharmacy college",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 6,
+   "offer": "150792907159",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Asked for a \"chote dhakkan wali\" (small-cap) one.",
+   "bot_error": "Recorded \"1/2 inch\", which was not even in the option list.",
+   "quote": "chote dhakkan wali",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 7,
+   "offer": "148254343495",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Gave the quantity as 20 \"peti\" (cartons).",
+   "bot_error": "Recorded the unit as \"pack\"; the auditor ruled peti is not a pack.",
+   "quote": "maximum 20 peti",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 8,
+   "offer": "148367534695",
+   "parameter": "Spec2 Accuracy",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said they want all grit sizes.",
+   "bot_error": "Recorded a single size, 500.",
+   "quote": "all grit sizes",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 9,
+   "offer": "145640522534",
+   "parameter": "Quantity Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Never gave a quantity.",
+   "bot_error": "Recorded a quantity anyway.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 10,
+   "offer": "145640522534",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Never gave a unit.",
+   "bot_error": "Recorded a unit anyway.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 11,
+   "offer": "145229504595",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said 72 pieces.",
+   "bot_error": "Recorded 72 sqft and also confirmed 72 pieces aloud.",
+   "quote": "72 Pieces",
+   "layer": "prompt",
+   "cluster": "value"
+  },
+  {
+   "id": 12,
+   "offer": "150913620652",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Did not confirm the requirement.",
+   "bot_error": "The lead was approved anyway.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "approve"
+  },
+  {
+   "id": 13,
+   "offer": "149551799652",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Answered \"No\" to the requirement, then hung up.",
+   "bot_error": "The lead was approved anyway.",
+   "quote": "No",
+   "layer": "flow_logic",
+   "cluster": "approve"
+  },
+  {
+   "id": 14,
+   "offer": "151906312167",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said the building is G+1 (number of floors).",
+   "bot_error": "Did not capture the number of floors.",
+   "quote": "G+1",
+   "layer": "prompt",
+   "cluster": "missed"
+  },
+  {
+   "id": 15,
+   "offer": "146501629646",
+   "parameter": "Qty Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said \"one big bag\" when asked how many kilos.",
+   "bot_error": "Did not capture the quantity.",
+   "quote": "one bag, one big bag",
+   "layer": "prompt",
+   "cluster": "missed"
+  },
+  {
+   "id": 16,
+   "offer": "150795858885",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said the size is 18 by 15.",
+   "bot_error": "Recorded 18 ft as the width instead of length 18 ft and width 15 ft.",
+   "quote": "18/15, 15 ka chahiye",
+   "layer": "prompt",
+   "cluster": "missed"
+  },
+  {
+   "id": 17,
+   "offer": "151045423163",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Answered \"Cylinder testing\" to an open question about type.",
+   "bot_error": "Did not capture this custom answer.",
+   "quote": "Cylinder testing",
+   "layer": "prompt",
+   "cluster": "missed"
+  },
+  {
+   "id": 18,
+   "offer": "145435157959",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Said \"six meter or twelve meter\" for lifting height.",
+   "bot_error": "Did not capture the values after offering meter options.",
+   "quote": "Chheh meter ya baarah meter",
+   "layer": "prompt",
+   "cluster": "missed"
+  },
+  {
+   "id": 19,
+   "offer": "149815715067",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Had to ask for the brand options.",
+   "bot_error": "Did not offer the brand options when asking the question.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "skip"
+  },
+  {
+   "id": 20,
+   "offer": "149793460559",
+   "parameter": "Quantity Probing Error",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Was never asked for a quantity.",
+   "bot_error": "Skipped the quantity question.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "skip"
+  },
+  {
+   "id": 21,
+   "offer": "145261422385",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Had only one spec defined, pack size.",
+   "bot_error": "Did not probe the remaining spec.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "skip"
+  },
+  {
+   "id": 22,
+   "offer": "149606162575",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Could not follow the production-capacity question.",
+   "bot_error": "Asked it so quickly that the buyer could not catch it; the buyer later hung up.",
+   "quote": "",
+   "layer": "prompt",
+   "cluster": "skip"
+  },
+  {
+   "id": 23,
+   "offer": "146585804767",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Wanted a soil dumping service.",
+   "bot_error": "Put the lead under Tipper Trucks and recorded the answer as \"10 wheeler\".",
+   "quote": "Soil Dumping Service",
+   "layer": "flow_logic",
+   "cluster": "category"
+  },
+  {
+   "id": 24,
+   "offer": "146585804767",
+   "parameter": "MCAT Search Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Wanted a service with no matching product category.",
+   "bot_error": "Mapped it to the nearest wrong category.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "category"
+  },
+  {
+   "id": 25,
+   "offer": "146339007375",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Changed to paper carry bags.",
+   "bot_error": "Could not switch product and left the lead under Handmade Gift, so the wrong seller was matched.",
+   "quote": "Paper Carry Bags",
+   "layer": "flow_logic",
+   "cluster": "category"
+  },
+  {
+   "id": 26,
+   "offer": "147866592359",
+   "parameter": "MCAT Search Error",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Asked for a syrup.",
+   "bot_error": "The lead went to the wrong product category.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "category"
+  },
+  {
+   "id": 27,
+   "offer": "145229504595",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Waited to be transferred.",
+   "bot_error": "Said the call would be transferred, then restarted the whole call flow, five times.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 28,
+   "offer": "145229504595",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Waited to be transferred.",
+   "bot_error": "Said it would transfer but never did; the record says Transferred, which is wrong.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 29,
+   "offer": "147866592359",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Was being transferred.",
+   "bot_error": "Said the whole transfer sentence twice in one go.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 30,
+   "offer": "151332292863",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Was waiting on the line.",
+   "bot_error": "Said \"good sellers are available on the line\" twice.",
+   "quote": "abhi line par kafi achhe seller available hain",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 31,
+   "offer": "144798266885",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Had just answered.",
+   "bot_error": "Said the \"seller is not available, I am IndiaMART\" opening twice.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 32,
+   "offer": "151766288259",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Was being connected to a seller.",
+   "bot_error": "Cut off the connect sentence after one word (\"mai\") and the call transferred.",
+   "quote": "mai",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 33,
+   "offer": "151561342746",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Was trying to say something.",
+   "bot_error": "Transferred to a live seller without hearing the buyer first.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 34,
+   "offer": "144976489875",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "A seller was available.",
+   "bot_error": "Did not transfer the call; the record says Refused.",
+   "quote": "",
+   "layer": "flow_logic",
+   "cluster": "handover"
+  },
+  {
+   "id": 35,
+   "offer": "150855659463",
+   "parameter": "Dead air",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Waited on the line.",
+   "bot_error": "A long silence on the call; the auditor gave no detail.",
+   "quote": "",
+   "layer": "unclear",
+   "cluster": "silence"
+  },
+  {
+   "id": 36,
+   "offer": "151809921685",
+   "parameter": "Dead air",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Waited on the line.",
+   "bot_error": "A silence on the call; the auditor gave no detail.",
+   "quote": "",
+   "layer": "unclear",
+   "cluster": "silence"
+  },
+  {
+   "id": 37,
+   "offer": "145229504595",
+   "parameter": "Dead air",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Waited on the line.",
+   "bot_error": "A silence on the call; the auditor gave no detail.",
+   "quote": "",
+   "layer": "unclear",
+   "cluster": "silence"
+  },
+  {
+   "id": 38,
+   "offer": "145229504595",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "Not explained by the auditor.",
+   "bot_error": "Not explained by the auditor.",
+   "quote": "",
+   "layer": "unclear",
+   "cluster": "oneoff"
+  }
+ ]
+}

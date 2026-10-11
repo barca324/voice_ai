@@ -1,0 +1,156 @@
+{
+ "id": "f-value",
+ "patch": {
+  "built_at": 1791643377,
+  "anchor_line": 652,
+  "inserted": "Record the buyer's own words exactly when they differ from the listed options (\"peti\" stays \"peti\", \"all sizes\" stays \"all sizes\", \"pharmacy college\" stays as said). Never replace a value with the closest option. If it is unclear which option the buyer means, repeat their words back once and ask.",
+  "chars_before": 158206,
+  "chars_after": 158504,
+  "before": [
+   "Accepting",
+   "Accept listed options or meaningful custom values relevant to the field. Preserve custom values without forcing them into listed options."
+  ],
+  "after": [
+   "Update @specifications with each field-value pair, preserving other fields. Capture answers to future fields immediately and skip those questions later.",
+   "Record explicit lack of preference as ANY and close the field."
+  ]
+ },
+ "pack": {
+  "created_at": 1791631577,
+  "product": "Plastic Bags",
+  "options": "{\"Size\": [\"8x10 inch\", \"9x13 inch\"], \"Material\": [\"Virgin\", \"HMHDPE\", \"LDPE\"]}",
+  "scripts": [
+   {
+    "id": "s1",
+    "kind": "target",
+    "title": "Pharmacy college use recorded as hospital",
+    "persona": "A buyer sourcing heavy-duty plastic bags for a pharmacy college wants to specify the exact use case.",
+    "lines": [
+     "Bhaiya, hume 9x13 inch ke bags chahiye pharmacy college ke liye.",
+     "Yeh medical supplies pack karne ke kaam aayenge.",
+     "Thode zyada strong chahiye, zyada tear nahi hone chahiye.",
+     "Aapke paas koi aur size hai kya?",
+     "Material mein virgin hi theek rahega.",
+     "Quantity 20 peti hogi, bhej dena.",
+     "Aur delivery 3 din mein kar dena.",
+     "Payment cash on delivery hoga."
+    ],
+    "expect": "The bot should record 'pharmacy college' exactly as the buyer said without swapping it to 'hospital use'."
+   },
+   {
+    "id": "s2",
+    "kind": "target",
+    "title": "Chote dhakkan wali recorded as 9x13 inch",
+    "persona": "A buyer looking for small-cap plastic bags to store small hardware items wants a smaller size.",
+    "lines": [
+     "Bhai, chote dhakkan wali bag chahiye, 9x13 inch se thoda chota.",
+     "Chote screws aur nails store karne hain.",
+     "Material virgin hona chahiye.",
+     "Quantity 10 peti mangwa lo.",
+     "Delivery kal tak ho jaye toh accha hai.",
+     "Rate thoda kam rakhna, regular order hai.",
+     "Payment online kar dunga."
+    ],
+    "expect": "The bot should record 'chote dhakkan wali' exactly and not replace it with '8x13 inch' or any listed option."
+   },
+   {
+    "id": "s3",
+    "kind": "target",
+    "title": "All sizes recorded as 8x10 inch",
+    "persona": "A buyer who needs plastic bags in all available sizes for a general store wants to order multiple sizes at once.",
+    "lines": [
+     "Bhaiya, mujhe dono size chahiye, 8x10 inch aur 9x13 inch.",
+     "Sabhi sizes ek saath bhej do.",
+     "Virgin material wale hi rakhna.",
+     "Quantity 5 peti har ek size ki.",
+     "Delivery address same hai.",
+     "Rate bata do dono ke.",
+     "Aur packing strong rakhna."
+    ],
+    "expect": "The bot should record 'all sizes' or '8x10 inch aur 9x13 inch' exactly instead of recording only '8x10 inch'."
+   },
+   {
+    "id": "s4",
+    "kind": "target",
+    "title": "72 pieces recorded as 72 sqft",
+    "persona": "A buyer ordering small plastic bags for retail packaging wants to specify 72 pieces.",
+    "lines": [
+     "Bhai, 72 pieces chahiye 8x10 inch wale.",
+     "Ek piece 10 rupaye ka hai toh rate batao.",
+     "Material virgin rakhna.",
+     "Quantity 5 peti kar do.",
+     "Delivery kal tak bhej do.",
+     "Rate mein thoda discount de dena.",
+     "Payment UPI se kar dunga."
+    ],
+    "expect": "The bot should record '72 pieces' exactly and not swap the unit to 'sqft'."
+   },
+   {
+    "id": "s5",
+    "kind": "target",
+    "title": "Quantity and unit recorded when not given",
+    "persona": "A buyer asking about plastic bag specifications wants to know the options and pricing without committing to a quantity.",
+    "lines": [
+     "Bhai, 9x13 inch ke virgin bags hain kya?",
+     "Material HMHDPE bhi hai kya?",
+     "Rate kitna padega ek piece ka?",
+     "Abhi quantity fix nahi hai.",
+     "Pata karke bataunga.",
+     "Thoda sample bhej do check karne ke liye.",
+     "Delivery address fix hai."
+    ],
+    "expect": "The bot should leave quantity and unit blank since the buyer never gave any quantity or unit."
+   },
+   {
+    "id": "s6",
+    "kind": "control",
+    "title": "Cooperative buyer asks for 8x10 inch virgin bags",
+    "persona": "A cooperative buyer who wants to order 8x10 inch virgin material plastic bags in a specific quantity.",
+    "lines": [
+     "Bhaiya, 8x10 inch ke bags chahiye.",
+     "Virgin material wale hi rakhna.",
+     "Quantity 10 peti mangwana hai.",
+     "Rate bata do.",
+     "Delivery kal tak chahiye.",
+     "Payment cash on delivery hoga.",
+     "Packing strong rakhna."
+    ],
+    "expect": "The bot should record the exact size, material, and quantity without any substitution or hallucination."
+   },
+   {
+    "id": "s7",
+    "kind": "control",
+    "title": "Buyer asks for 9x13 inch HMHDPE bags",
+    "persona": "A cooperative buyer who wants to order 9x13 inch HMHDPE plastic bags.",
+    "lines": [
+     "Bhaiya, 9x13 inch ke HMHDPE bags chahiye.",
+     "Quantity 5 peti mangwa lo.",
+     "Rate kitna hoga?",
+     "Delivery kal tak bhej do.",
+     "Payment online kar dunga.",
+     "Packing acchi rakhna.",
+     "Aur receipt bhi de dena."
+    ],
+    "expect": "The bot should record the exact size, material, and quantity without any substitution or hallucination."
+   },
+   {
+    "id": "s8",
+    "kind": "control",
+    "title": "Buyer asks about virgin material 8x10 inch",
+    "persona": "A cooperative buyer who wants to order 8x10 inch virgin material plastic bags.",
+    "lines": [
+     "Bhaiya, 8x10 inch ke virgin bags hain kya?",
+     "Rate bata do.",
+     "Quantity 2 peti mangwa lo.",
+     "Delivery kal tak bhej do.",
+     "Payment UPI se kar dunga.",
+     "Packing strong rakhna.",
+     "Aur receipt bhi de dena."
+    ],
+    "expect": "The bot should record the exact size, material, and quantity without any substitution or hallucination."
+   }
+  ]
+ },
+ "runs": [],
+ "decision": null
+}

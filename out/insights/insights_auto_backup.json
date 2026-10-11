@@ -1,0 +1,766 @@
+{
+ "generated_at": "2026-10-10 16:29",
+ "calls": 30,
+ "issues": 40,
+ "fatal_calls": 18,
+ "nonfatal_calls": 12,
+ "by_parameter": {
+  "Spec Missed Opportunity": {
+   "Fatal": 3,
+   "Non-Fatal": 4
+  },
+  "Quantity Unit Accuracy": {
+   "Fatal": 4,
+   "Non-Fatal": 0
+  },
+  "Outcome Accuracy": {
+   "Fatal": 3,
+   "Non-Fatal": 0
+  },
+  "Spec1 Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 1
+  },
+  "Spec2 Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 1
+  },
+  "WER": {
+   "Fatal": 1,
+   "Non-Fatal": 4
+  },
+  "Quantity Accuracy": {
+   "Fatal": 2,
+   "Non-Fatal": 0
+  },
+  "Looping Behavior": {
+   "Fatal": 1,
+   "Non-Fatal": 3
+  },
+  "MCAT Search Error": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "Dead air": {
+   "Fatal": 1,
+   "Non-Fatal": 1
+  },
+  "Quantity Probing Error": {
+   "Fatal": 1,
+   "Non-Fatal": 0
+  },
+  "Qty Missed Opportunity": {
+   "Fatal": 1,
+   "Non-Fatal": 0
+  },
+  "OnCall AstBuy Error": {
+   "Fatal": 0,
+   "Non-Fatal": 3
+  }
+ },
+ "clusters": [
+  {
+   "title": "Misheard quantity units and specs",
+   "plain_summary": "The bot mishears quantity values and units, or incorrectly captures product specifications. This leads to wrong order details and failed sales.",
+   "layer": "speech_recognition",
+   "members": [
+    0,
+    19,
+    21,
+    2,
+    3,
+    9,
+    33,
+    8,
+    13,
+    4,
+    5,
+    6,
+    7,
+    31,
+    29,
+    32,
+    15,
+    34,
+    36,
+    39,
+    11,
+    12,
+    17,
+    18,
+    20
+   ],
+   "issues": 25,
+   "calls": 21,
+   "fatal": 17,
+   "score": 59,
+   "parameters": [
+    "MCAT Search Error",
+    "Outcome Accuracy",
+    "Quantity Accuracy",
+    "Quantity Probing Error",
+    "Quantity Unit Accuracy",
+    "Spec Missed Opportunity",
+    "Spec1 Accuracy",
+    "Spec2 Accuracy",
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "149775501595",
+     "parameter": "Quantity Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The buyer mentioned '5 5' to specify 5 kilograms.",
+     "bot_error": "The bot incorrectly captured the quantity as 55 Kg instead of 5 Kg.",
+     "quote": "5 5"
+    },
+    {
+     "offer": "145640522534",
+     "parameter": "Quantity Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The buyer specified a quantity of 200 ml but the bot incorrectly confirmed 500 ml and later closed the call with 200 ml without updating the order details.",
+     "bot_error": "The bot incorrectly confirmed the wrong quantity of 500 ml instead of the buyer's requested 200 ml and failed to capture the correct quantity.",
+     "quote": "नहीं नहीं फाइव हंड्रेड नहीं"
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "Quantity Unit Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The buyer stated they needed 72 pieces of sheet, but the bot captured it as 72 sqft.",
+     "bot_error": "The bot misheard the buyer's quantity and unit, confirming 72 pieces instead of 72 sqft.",
+     "quote": "Quantity to बता रहे हैं कि बहत्तर पीस चाहिए, बहत्तर पीस"
+    },
+    {
+     "offer": "149815715067",
+     "parameter": "Spec Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "The buyer asked the bot to tell them which brands are available.",
+     "bot_error": "The bot did not proactively provide the list of available brands to the buyer.",
+     "quote": "आप ब्रांड को बताइए ना कौन सा ब्रांड देंगे? कलर तो."
+    }
+   ],
+   "detected_by_agent": 3,
+   "rank": 1,
+   "fix": {
+    "fix_type": "speech_recognition_check",
+    "change": "Verify speech-to-text output for numerical values, units, and brand names before confirming them, and if confidence is low on a critical spec or unit, re-ask the buyer to confirm.",
+    "where": "Add as a new instruction block before confirmation and finalisation steps, and before routing to live sellers.",
+    "already_covered": "No existing rule found.",
+    "risk": "Re-asking for confirmation might increase call duration and cause impatient buyers to drop off.",
+    "test_buyer": "A buyer says 'I need 5 5 kilos of this item' and the bot must confirm 5 Kg instead of 55 Kg, or asks for '200 ml' and the bot must confirm 200 ml, not 500 ml."
+   }
+  },
+  {
+   "title": "False transfer and call routing errors",
+   "plain_summary": "The bot falsely claims it is transferring the call or connects to the wrong seller. This causes buyers to be routed to irrelevant vendors or left hanging.",
+   "layer": "flow_logic",
+   "members": [
+    1,
+    22,
+    24,
+    25,
+    26,
+    27,
+    28,
+    30,
+    35,
+    37,
+    38
+   ],
+   "issues": 11,
+   "calls": 9,
+   "fatal": 3,
+   "score": 17,
+   "parameters": [
+    "Dead air",
+    "Looping Behavior",
+    "OnCall AstBuy Error",
+    "Outcome Accuracy",
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "150913620652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The bot asked if the buyer needed duck eggs, but the buyer only said hello and did not confirm the requirement.",
+     "bot_error": "The bot assumed the buyer confirmed the requirement without getting a clear yes or no.",
+     "quote": "जी आपको डक एग्स की रिक्वायरमेंट थी ना"
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "Looping Behavior",
+     "verdict": "Fatal",
+     "trigger": "The buyer agreed to talk to a seller multiple times, but the bot restarted the initial flow instead of transferring the call.",
+     "bot_error": "The bot repeatedly stated it would transfer the call but kept restarting the initial call flow instead.",
+     "quote": "ठीक है, मैं आपकी कॉल ट्रांसफर कर रही हूं और बाकी सेलर्स की डिटेल्स आपको व्हाट्सएप पर भेज दी जाएंगी, प्लीज लाइन पर बने रहें"
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "OnCall AstBuy Error",
+     "verdict": "Non-Fatal",
+     "trigger": "The bot said the call would be transferred to a seller, but the call was not actually transferred.",
+     "bot_error": "The bot falsely reported the call as transferred instead of actually connecting it to a seller.",
+     "quote": "AST_CALL_REMARK\":\"Transferred\" which is wrong"
+    },
+    {
+     "offer": "150855659463",
+     "parameter": "Dead air",
+     "verdict": "Fatal",
+     "trigger": "The bot fell silent after the buyer asked if it wanted broiler poultry feed, and the buyer only said 'broiler' before the call ended.",
+     "bot_error": "The bot failed to respond to the buyer's query and remained silent for multiple seconds.",
+     "quote": "[16.0s] BOT: हेलो।"
+    }
+   ],
+   "detected_by_agent": 4,
+   "rank": 2,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "After announcing a transfer (e.g., setting @connect_ast_call to '1'), do not restart the initial flow or loop the transfer prompt. If the buyer speaks during transfer, listen and respond to their query, then re-initiate the transfer. If the buyer offers to send details via WhatsApp, acknowledge it, update @bl_converted to 1, @identity_revealed to 1, and @current_phase to 'requirement_collect', then continue collecting requirement details instead of going silent.",
+    "where": "Append to para 42 and para 290, and add a new rule after para 895: 'After initiating a transfer, do not restart the initial flow. If the buyer speaks, address their query and re-initiate transfer. If the buyer offers WhatsApp, collect remaining details and continue the flow.'",
+    "already_covered": "No existing rule found. Para 895 prohibits repeated questioning, but it does not address flow restart or dead air during transfer.",
+    "risk": "Strict enforcement of 'do not restart flow' might prevent recovery from genuine system hangs, potentially causing the bot to remain stuck in the transfer state indefinitely.",
+    "test_buyer": "A buyer says 'hello' and the bot asks if they need duck eggs. The buyer does not answer and instead asks 'how many cartons are needed?'. The bot must answer the question, collect the quantity, and then proceed to transfer, rather than falsely claiming transfer or going silent."
+   }
+  },
+  {
+   "title": "Missing spec capture and probing gaps",
+   "plain_summary": "The bot fails to capture important buyer details or ask for necessary quantities. This results in incomplete leads and missed sales.",
+   "layer": "flow_logic",
+   "members": [
+    14,
+    16,
+    23
+   ],
+   "issues": 3,
+   "calls": 3,
+   "fatal": 2,
+   "score": 7,
+   "parameters": [
+    "Outcome Accuracy",
+    "Qty Missed Opportunity",
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "146501629646",
+     "parameter": "Qty Missed Opportunity",
+     "verdict": "Fatal",
+     "trigger": "The buyer specified the quantity as one big bag in Hindi.",
+     "bot_error": "The bot ignored the buyer's quantity and moved on to asking for the feed type.",
+     "quote": "One bag, one big bag."
+    },
+    {
+     "offer": "149551799652",
+     "parameter": "Outcome Accuracy",
+     "verdict": "Fatal",
+     "trigger": "The buyer clearly said no to the service requirement and disconnected the call, but the bot approved the seller anyway.",
+     "bot_error": "The bot approved the seller even though the buyer explicitly rejected the service and disconnected.",
+     "quote": "Buyer: No"
+    },
+    {
+     "offer": "145229504595",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "The bot failed to understand the buyer's Hindi speech, causing the buyer to repeat their request multiple times.",
+     "bot_error": "The bot did not understand the buyer's speech and asked for the quantity and unit again.",
+     "quote": "Quantity आप सेलर को बता दीजिएगा"
+    }
+   ],
+   "detected_by_agent": 1,
+   "rank": 3,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "If the buyer's quantity is ambiguous, unconfirmed, or missing (e.g., 'one big bag'), ask a direct, simple clarifying question to capture the numeric quantity and unit. If the buyer explicitly rejects the service or disconnects, do not approve the lead; set @buyer_disposition to 'BL Enriched' and @call_outcome to 'BL Enriched' (not 'BL Approved'), then end the interaction.",
+    "where": "Add after para 199 and before para 288 to strengthen intent handling and outcome accuracy.",
+    "already_covered": "No existing rule found.",
+    "risk": "Asking for quantity clarification on every ambiguous response might slightly increase call length, but prevents incomplete leads.",
+    "test_buyer": "Buyer: 'Mujhe ek bada bag chahiye.' Bot: 'Kitne kilo ya kitne pieces chahiye?' Buyer: 'Nahi, bas ek bada bag.' Bot: 'Samajh gaya, ek bada bag. Kya yeh 10 kilo ya 25 kilo ka hai?'"
+   }
+  },
+  {
+   "title": "Bot fails to respond to buyer input",
+   "plain_summary": "The bot remains silent or gives generic replies when the buyer speaks. This causes the buyer to disconnect or repeat themselves.",
+   "layer": "language_config",
+   "members": [
+    10
+   ],
+   "issues": 1,
+   "calls": 1,
+   "fatal": 0,
+   "score": 1,
+   "parameters": [
+    "WER"
+   ],
+   "examples": [
+    {
+     "offer": "150792907159",
+     "parameter": "WER",
+     "verdict": "Non-Fatal",
+     "trigger": "The buyer said 'hanji Sir ji', but the bot replied with a Hindi phrase that did not match the request.",
+     "bot_error": "The bot gave a generic Hindi response instead of acknowledging the buyer's greeting.",
+     "quote": "हाँ जी सर जी"
+    }
+   ],
+   "detected_by_agent": 0,
+   "rank": 4,
+   "fix": {
+    "fix_type": "prompt_patch",
+    "change": "If the buyer says 'hanji' or any other greeting, acknowledge it briefly and immediately ask a specific follow-up question to continue the call flow.",
+    "where": "para 46",
+    "already_covered": "para 46",
+    "risk": "May cause the bot to sound less natural or overly rigid if it does not adapt to the specific greeting context.",
+    "test_buyer": "Simulate a buyer who says 'hanji Sir ji' to check if the bot acknowledges the greeting and asks a specific next question instead of staying silent or giving a generic response."
+   }
+  }
+ ],
+ "quality": {
+  "clusters": 4,
+  "issues_in_named_clusters": 40,
+  "coverage_pct": 100,
+  "agent_detected_pct": 20,
+  "human_grouping_done": false
+ },
+ "all_issues": [
+  {
+   "offer": "149775501595",
+   "parameter": "Quantity Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer mentioned '5 5' to specify 5 kilograms.",
+   "bot_error": "The bot incorrectly captured the quantity as 55 Kg instead of 5 Kg.",
+   "quote": "5 5",
+   "layer": "speech_recognition",
+   "id": 0
+  },
+  {
+   "offer": "150913620652",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The bot asked if the buyer needed duck eggs, but the buyer only said hello and did not confirm the requirement.",
+   "bot_error": "The bot assumed the buyer confirmed the requirement without getting a clear yes or no.",
+   "quote": "जी आपको डक एग्स की रिक्वायरमेंट थी ना",
+   "layer": "flow_logic",
+   "id": 1
+  },
+  {
+   "offer": "149815715067",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The buyer asked the bot to tell them which brands are available.",
+   "bot_error": "The bot did not proactively provide the list of available brands to the buyer.",
+   "quote": "आप ब्रांड को बताइए ना कौन सा ब्रांड देंगे? कलर तो.",
+   "layer": "flow_logic",
+   "id": 2
+  },
+  {
+   "offer": "150467291263",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer mentioned the brand as 'Dubai Kunafa' but the bot misheard it.",
+   "bot_error": "The bot misheard the brand name and captured it as 'Dubai Kona' instead of 'Dubai Kunafa'.",
+   "quote": "दुबई तो ना था।",
+   "layer": "speech_recognition",
+   "id": 3
+  },
+  {
+   "offer": "151583069359",
+   "parameter": "Spec2 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer explicitly clarified that the item was for a Pharmacy College in Erode, not for a hospital.",
+   "bot_error": "The bot incorrectly categorized the buyer's requirement as hospital use instead of pharmacy college.",
+   "quote": "Hospital नहीं, यह ईरोड कॉलेज ऑफ फार्मेसी। फार्मेसी कॉलेज है।",
+   "layer": "prompt",
+   "id": 4
+  },
+  {
+   "offer": "151583069359",
+   "parameter": "Spec2 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer stated that the item was for a Pharmacy College in Erode.",
+   "bot_error": "The bot failed to capture the specific educational institution type and defaulted to a generic hospital use category.",
+   "quote": "यह ईरोड कॉलेज ऑफ फार्मेसी। फार्मेसी कॉलेज है।",
+   "layer": "prompt",
+   "id": 5
+  },
+  {
+   "offer": "146585804767",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer asked for a 'Soil Dumping Service' but the bot incorrectly mapped it to 'Tipper Trucks' and captured '10 wheeler' in the spec.",
+   "bot_error": "The bot incorrectly mapped the buyer's soil dumping service request to the wrong category and captured incorrect wheel specifications.",
+   "quote": "10 wheeler",
+   "layer": "option_lists",
+   "id": 6
+  },
+  {
+   "offer": "146585804767",
+   "parameter": "MCAT Search Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer requested a 'Soil Dumping Service' but no relevant MCAT was available for this service.",
+   "bot_error": "The bot mapped the buyer's request to the wrong category ('Tipper Trucks') instead of finding the correct service.",
+   "quote": "BL was wrongly mapped in \"Tipper Trucks\"",
+   "layer": "flow_logic",
+   "id": 7
+  },
+  {
+   "offer": "146339007375",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer asked for Paper Carry Bags but the bot asked about Handmade Gift products and connected the buyer to the wrong seller.",
+   "bot_error": "The bot failed to understand the buyer's request for paper bags and routed them to a handmade gift seller.",
+   "quote": "क्या आपको प्लांट गिफ्टिंग हैंड कैरी की रिक्वायरमेंट है?",
+   "layer": "flow_logic",
+   "id": 8
+  },
+  {
+   "offer": "150792907159",
+   "parameter": "Spec1 Accuracy",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer asked for a small cap sealing machine, but the bot incorrectly captured the diameter as 1/2 inch.",
+   "bot_error": "The bot misidentified the buyer's requirement as a 1/2 inch drum cap seal.",
+   "quote": "चोटे ढक्कन वाली चाहिए",
+   "layer": "option_lists",
+   "id": 9
+  },
+  {
+   "offer": "150792907159",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer said 'hanji Sir ji', but the bot replied with a Hindi phrase that did not match the request.",
+   "bot_error": "The bot gave a generic Hindi response instead of acknowledging the buyer's greeting.",
+   "quote": "हाँ जी सर जी",
+   "layer": "speech_recognition",
+   "id": 10
+  },
+  {
+   "offer": "149793460559",
+   "parameter": "Quantity Probing Error",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer never specified a required quantity for the product, only mentioning a color and height.",
+   "bot_error": "The bot did not ask the buyer for the quantity of the item they wanted.",
+   "quote": "Would you prefer something like 18 inch or 14 inch?",
+   "layer": "flow_logic",
+   "id": 11
+  },
+  {
+   "offer": "151906312167",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer mentioned the spec 'Number of Floors' as G+1 but the bot failed to capture it.",
+   "bot_error": "The bot asked for the number of floors and suggested G+1 but did not capture or confirm the buyer's specific choice of G+1.",
+   "quote": "नंबर ऑफ वोट्स। ग्राउंड फ्लोर।",
+   "layer": "prompt",
+   "id": 12
+  },
+  {
+   "offer": "151774390467",
+   "parameter": "WER",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer said \"electronic cable\" and the bot misheard it as \"Left Hand Cable\".",
+   "bot_error": "The bot misheard and mapped the buyer's request to the wrong product category.",
+   "quote": "इलेक्ट्रॉनिक केबल्स।",
+   "layer": "speech_recognition",
+   "id": 13
+  },
+  {
+   "offer": "146501629646",
+   "parameter": "Qty Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer specified the quantity as one big bag in Hindi.",
+   "bot_error": "The bot ignored the buyer's quantity and moved on to asking for the feed type.",
+   "quote": "One bag, one big bag.",
+   "layer": "speech_recognition",
+   "id": 14
+  },
+  {
+   "offer": "145261422385",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer requested a specific resin type ('super super charge') and discussed pricing details that the bot did not capture.",
+   "bot_error": "The bot only asked about the pack size and missed the opportunity to probe the buyer's specific resin requirements.",
+   "quote": "ये डी एम वाटर के लिए कौन सा होता है सुपर सुपर चार्ज?",
+   "layer": "flow_logic",
+   "id": 15
+  },
+  {
+   "offer": "149551799652",
+   "parameter": "Outcome Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The buyer clearly said no to the service requirement and disconnected the call, but the bot approved the seller anyway.",
+   "bot_error": "The bot approved the seller even though the buyer explicitly rejected the service and disconnected.",
+   "quote": "Buyer: No",
+   "layer": "flow_logic",
+   "id": 16
+  },
+  {
+   "offer": "148254343495",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer said they needed 20 peti of diapers.",
+   "bot_error": "The bot updated the unit to packets instead of peti.",
+   "quote": "Ma'am maximum 20 packets.",
+   "layer": "option_lists",
+   "id": 17
+  },
+  {
+   "offer": "148254343495",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer mentioned peti as the quantity unit.",
+   "bot_error": "The bot updated peti to packets in the system.",
+   "quote": "Buyer mentioned \"Peti\" as qty unit bot updated as pack",
+   "layer": "prompt",
+   "id": 18
+  },
+  {
+   "offer": "145640522534",
+   "parameter": "Quantity Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Non-Fatal",
+   "trigger": "The buyer specified a quantity of 200 ml but the bot incorrectly confirmed 500 ml and later closed the call with 200 ml without updating the order details.",
+   "bot_error": "The bot incorrectly confirmed the wrong quantity of 500 ml instead of the buyer's requested 200 ml and failed to capture the correct quantity.",
+   "quote": "नहीं नहीं फाइव हंड्रेड नहीं",
+   "layer": "prompt",
+   "id": 19
+  },
+  {
+   "offer": "145640522534",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The buyer explicitly rejected the bot's 500 ml suggestion and then restated their requirement for 200 ml.",
+   "bot_error": "The bot failed to update the quantity to 200 ml after the buyer rejected the 500 ml option and instead closed the call without confirming the correct quantity.",
+   "quote": "वाटर बॉटल चाहिए, वाटर बॉटल 200 ml की",
+   "layer": "flow_logic",
+   "id": 20
+  },
+  {
+   "offer": "145229504595",
+   "parameter": "Quantity Unit Accuracy",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer stated they needed 72 pieces of sheet, but the bot captured it as 72 sqft.",
+   "bot_error": "The bot misheard the buyer's quantity and unit, confirming 72 pieces instead of 72 sqft.",
+   "quote": "Quantity to बता रहे हैं कि बहत्तर पीस चाहिए, बहत्तर पीस",
+   "layer": "speech_recognition",
+   "id": 21
+  },
+  {
+   "offer": "145229504595",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The buyer agreed to talk to a seller multiple times, but the bot restarted the initial flow instead of transferring the call.",
+   "bot_error": "The bot repeatedly stated it would transfer the call but kept restarting the initial call flow instead.",
+   "quote": "ठीक है, मैं आपकी कॉल ट्रांसफर कर रही हूं और बाकी सेलर्स की डिटेल्स आपको व्हाट्सएप पर भेज दी जाएंगी, प्लीज लाइन पर बने रहें",
+   "layer": "flow_logic",
+   "id": 22
+  },
+  {
+   "offer": "145229504595",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot failed to understand the buyer's Hindi speech, causing the buyer to repeat their request multiple times.",
+   "bot_error": "The bot did not understand the buyer's speech and asked for the quantity and unit again.",
+   "quote": "Quantity आप सेलर को बता दीजिएगा",
+   "layer": "speech_recognition",
+   "id": 23
+  },
+  {
+   "offer": "145229504595",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The bot said the call would be transferred to a seller, but the call was not actually transferred.",
+   "bot_error": "The bot falsely reported the call as transferred instead of actually connecting it to a seller.",
+   "quote": "AST_CALL_REMARK\":\"Transferred\" which is wrong",
+   "layer": "flow_logic",
+   "id": 24
+  },
+  {
+   "offer": "150855659463",
+   "parameter": "Dead air",
+   "human_verdict": "Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The bot fell silent after the buyer asked if it wanted broiler poultry feed, and the buyer only said 'broiler' before the call ended.",
+   "bot_error": "The bot failed to respond to the buyer's query and remained silent for multiple seconds.",
+   "quote": "[16.0s] BOT: हेलो।",
+   "layer": "flow_logic",
+   "id": 25
+  },
+  {
+   "offer": "151561342746",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer was speaking while the bot was trying to transfer the call to a live seller.",
+   "bot_error": "The bot did not listen to the buyer and initiated the transfer instead.",
+   "quote": "bot should have been listen to the buyer",
+   "layer": "flow_logic",
+   "id": 26
+  },
+  {
+   "offer": "144976489875",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The buyer said she was from IndiaMART and asked how many cartons were needed.",
+   "bot_error": "The bot misunderstood and replied that it wanted 100%.",
+   "quote": "मेरे को 100% चाहिए।",
+   "layer": "speech_recognition",
+   "id": 27
+  },
+  {
+   "offer": "144976489875",
+   "parameter": "OnCall AstBuy Error",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer stated the AST seller was available, but the system refused to transfer the call.",
+   "bot_error": "The bot failed to transfer the call to the available seller.",
+   "quote": "AST_CALL_REMARK\":\"Refused\"",
+   "layer": "flow_logic",
+   "id": 28
+  },
+  {
+   "offer": "150795858885",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "Pass",
+   "trigger": "The buyer specified dimensions as '18 by 15, 15 ka chahiye' and later clarified '12 by 15 ka do bundle lena hai'.",
+   "bot_error": "The bot swapped the length and width values, capturing the width as 18 ft and the length as 15 ft.",
+   "quote": "मुझे 18 बाई 15, 15 का चाहिए",
+   "layer": "option_lists",
+   "id": 29
+  },
+  {
+   "offer": "147866592359",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot repeated the exact same call transfer message twice without pausing or waiting for the buyer's response.",
+   "bot_error": "The bot failed to detect the buyer's subsequent replies and repeated the transfer statement.",
+   "quote": "ठीक है, मैं आपकी कॉल ट्रांसफर कर रही हूं और बाकी सेलर्स की डिटेल्स आपको व्हाट्सएप पर भेज दी जाएंगी. प्लीज लाइन पर बने रहें.",
+   "layer": "flow_logic",
+   "id": 30
+  },
+  {
+   "offer": "147866592359",
+   "parameter": "MCAT Search Error",
+   "human_verdict": "Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot incorrectly mapped the buyer's product to a different item instead of the exact match.",
+   "bot_error": "The bot ignored the exact match for the requested medicine and mapped the title to an incorrect product.",
+   "quote": "आप जिस सेलर को कॉल कर रहे थे वो अवेलेबल नहीं है और मैं इंडिया मार्ट से बोल रही हूं, आपको कितने बोतल चाहिए होगी?",
+   "layer": "flow_logic",
+   "id": 31
+  },
+  {
+   "offer": "148367534695",
+   "parameter": "Spec2 Accuracy",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer asked for all grit sizes and the bot only captured '500'.",
+   "bot_error": "The bot incorrectly captured only one specific grit size instead of all available options.",
+   "quote": "आपको सभी ग्रेट ऑप्शंस चाहिए? साठ, अस्सी, 120, 124 और 36।",
+   "layer": "prompt",
+   "id": 32
+  },
+  {
+   "offer": "151766288259",
+   "parameter": "WER",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot did not finish its Live seller connect statement, only saying 'mai', and the call was transferred before it could complete the sentence.",
+   "bot_error": "The bot cut off its introductory statement and transferred the call to a live seller before completing the prompt.",
+   "quote": "only \"mai\" is present then call got transfered",
+   "layer": "prompt",
+   "id": 33
+  },
+  {
+   "offer": "151045423163",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer mentioned wanting cylinder testing when asked about the kit type.",
+   "bot_error": "The bot ignored the buyer's request for cylinder testing and did not capture it as a custom specification.",
+   "quote": "Buyer: Cylinder testing.",
+   "layer": "flow_logic",
+   "id": 34
+  },
+  {
+   "offer": "151809921685",
+   "parameter": "Dead air",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "Fatal",
+   "trigger": "The bot did not respond after the buyer offered to send details on WhatsApp.",
+   "bot_error": "The bot gave an incomplete response and remained silent when the buyer was wrapping up the call.",
+   "quote": "पैसे का।",
+   "layer": "flow_logic",
+   "id": 35
+  },
+  {
+   "offer": "145435157959",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The buyer offered two valid lifting height options, 6 meters and 12 meters, but the bot failed to select either and dropped the conversation.",
+   "bot_error": "The bot did not respond to the buyer's selection of lifting height options and abruptly ended the call.",
+   "quote": "Buyer:Chheh meter ya to baarah meter",
+   "layer": "flow_logic",
+   "id": 36
+  },
+  {
+   "offer": "151332292863",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot repeated the exact phrase 'abhi line par kafi achhe seller available hain' twice.",
+   "bot_error": "The bot repeated the exact same phrase twice instead of acknowledging the buyer's request to connect with sellers or moving the conversation forward.",
+   "quote": "अभी लाइन पे।",
+   "layer": "flow_logic",
+   "id": 37
+  },
+  {
+   "offer": "144798266885",
+   "parameter": "Looping Behavior",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot repeated the same unavailable-seller prompt twice.",
+   "bot_error": "The bot looped and repeated its prompt about the seller being unavailable.",
+   "quote": "Aap jis seller ko call kar rahe the woh available nahi hai aur mein IndiaMart se bol rahi hoon",
+   "layer": "flow_logic",
+   "id": 38
+  },
+  {
+   "offer": "149606162575",
+   "parameter": "Spec Missed Opportunity",
+   "human_verdict": "Non-Fatal",
+   "agent_verdict": "NA",
+   "trigger": "The bot abruptly asked about production capacity before the buyer could finish answering the motor power question.",
+   "bot_error": "The bot rushed to the next specification instead of waiting for the buyer to finish speaking.",
+   "quote": "क्या आप अभी लाइन पर हैं? बताइए मोटर पावर में क्या प्रेफर करेंगे।",
+   "layer": "flow_logic",
+   "id": 39
+  }
+ ]
+}
